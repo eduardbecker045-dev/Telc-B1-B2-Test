@@ -1126,11 +1126,11 @@ function calculateScores() {
         });
     });
     
-    // Score Zusatz
+    // Score Zusatz (50% pro richtige Aufgabe)
     testData.zusatz.forEach(m => {
         m.correctAnswers.forEach((correct, i) => {
             const ans = userAnswers[`${m.id}_${i + 1}`];
-            if (ans?.toLowerCase() === correct.toLowerCase()) scores.zusatz.correct++;
+            if (ans?.toLowerCase() === correct.toLowerCase()) scores.zusatz.correct += 0.5;
         });
     });
     
