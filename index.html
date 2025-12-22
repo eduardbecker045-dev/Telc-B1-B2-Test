@@ -116,6 +116,10 @@
         .gap-input { display: inline-block; min-width: 120px; padding: 6px 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 1em; text-align: center; margin: 0 5px; }
         .gap-input:focus { outline: none; border-color: #4ade80; }
         .gap-input.filled { border-color: #4ade80; background: rgba(74,222,128,0.2); }
+        .gap-select { display: inline-block; min-width: 150px; padding: 6px 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 1em; margin: 0 5px; cursor: pointer; }
+        .gap-select:focus { outline: none; border-color: #4ade80; }
+        .gap-select.filled { border-color: #4ade80; background: rgba(74,222,128,0.2); }
+        .gap-select option { background: #1a1a2e; color: #fff; }
         .gap-number { display: inline-block; background: #f59e0b; color: #000; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; font-size: 0.75em; font-weight: bold; margin-right: 3px; vertical-align: middle; }
         
         /* Word Bank */
@@ -813,7 +817,7 @@ function renderCurrentModule() {
             rightHTML += `<div class="text-content"><p style="color:#94a3b8;">Die Lücken befinden sich im Text links. Wählen Sie für jede Nummer die passende Option aus den Dropdown-Menüs.</p></div>`;
             break;
         case 'gapFill':
-            rightHTML += renderWordBank(module);
+            // rightHTML += renderWordBank(module); // Disabled: Words now in dropdown
             leftHTML += renderGapText(module);
             break;
     }
@@ -934,9 +938,17 @@ function renderGapText(module) {
     let html = `<div class="text-content">`;
     let text = module.text;
     const gapCount = (text.match(/__\d+__/g) || []).length;
+    
+    // Randomize word bank for dropdown (shuffle array)
+    const shuffledWords = [...module.wordBank].sort(() => Math.random() - 0.5);
+    
     for (let i = 1; i <= gapCount; i++) {
         const saved = userAnswers[`${module.id}_${i}`] || '';
-        text = text.replace(`__${i}__`, `<span class="gap-number">${i}</span><input type="text" class="gap-input ${saved ? 'filled' : ''}" id="gap_${module.id}_${i}" value="${saved}" onfocus="focusGap('${module.id}',${i})" onchange="saveGapAnswer('${module.id}',${i},this.value)">`);
+        const dropdownHTML = `<span class="gap-number">${i}</span><select class="gap-select ${saved ? 'filled' : ''}" id="gap_${module.id}_${i}" onchange="saveGapAnswer('${module.id}',${i},this.value)">
+            <option value="">-- Wählen --</option>
+            ${shuffledWords.map(w => `<option value="${w.toLowerCase()}" ${saved === w.toLowerCase() ? 'selected' : ''}>${w}</option>`).join('')}
+        </select>`;
+        text = text.replace(`__${i}__`, dropdownHTML);
     }
     html += text.replace(/\n/g, '<br>') + '</div>';
     return html;
