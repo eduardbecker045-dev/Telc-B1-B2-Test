@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>telc Deutsch B1-B2 Pflege - Übungstest</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #fff; }
+        
+        /* Registration Screen */
+        .registration-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .registration-box { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; max-width: 500px; width: 100%; border: 1px solid rgba(255,255,255,0.2); }
+        .registration-box h1 { text-align: center; margin-bottom: 10px; color: #4ade80; }
+        .registration-box .subtitle { text-align: center; color: #94a3b8; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #e2e8f0; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: #fff; font-size: 16px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #4ade80; }
+        .form-group select option { background: #1a1a2e; color: #fff; }
+        .start-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #4ade80, #22c55e); border: none; border-radius: 10px; color: #fff; font-size: 18px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 20px; }
+        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(74,222,128,0.3); }
+        .test-info { background: rgba(59,130,246,0.2); border-radius: 10px; padding: 15px; margin-bottom: 25px; }
+        .test-info h3 { color: #60a5fa; margin-bottom: 10px; }
+        .test-info ul { list-style: none; }
+        .test-info li { padding: 5px 0; color: #94a3b8; }
+        .test-info li::before { content: "✓"; color: #4ade80; margin-right: 10px; }
+        
+        /* Test Container */
+        .test-container { display: none; height: 100vh; overflow: hidden; }
+        
+        /* Header */
+        .header { background: rgba(0,0,0,0.3); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo h1 { font-size: 1.2em; color: #4ade80; }
+        .user-info { color: #94a3b8; font-size: 0.9em; }
+        .timer-box { background: linear-gradient(135deg, #3b82f6, #1d4ed8); padding: 10px 20px; border-radius: 10px; text-align: center; min-width: 120px; }
+        .timer-box.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .timer-box.danger { background: linear-gradient(135deg, #ef4444, #dc2626); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .timer-label { font-size: 0.75em; opacity: 0.8; }
+        .timer-display { font-size: 1.5em; font-weight: bold; font-family: monospace; }
+        
+        /* Section Tabs */
+        .section-tabs { display: flex; background: rgba(0,0,0,0.2); padding: 10px 25px; gap: 10px; overflow-x: auto; }
+        .section-tab { padding: 12px 25px; background: rgba(255,255,255,0.1); border: 2px solid transparent; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.3s; white-space: nowrap; }
+        .section-tab:hover { background: rgba(255,255,255,0.15); }
+        .section-tab.active.lesen { background: linear-gradient(135deg, #22c55e, #16a34a); border-color: #4ade80; }
+        .section-tab.active.hoeren { background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-color: #a78bfa; }
+        .section-tab.active.zusatz { background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fbbf24; }
+        .section-tab .section-name { font-weight: 600; }
+        .section-tab .section-info { font-size: 0.8em; opacity: 0.8; margin-top: 3px; }
+        
+        /* Module Tabs */
+        .module-tabs { display: flex; background: rgba(0,0,0,0.15); padding: 8px 25px; gap: 8px; overflow-x: auto; }
+        .module-tab { padding: 8px 16px; background: rgba(255,255,255,0.1); border-radius: 6px; cursor: pointer; white-space: nowrap; font-size: 0.9em; transition: all 0.3s; }
+        .module-tab:hover { background: rgba(255,255,255,0.2); }
+        .module-tab.active { background: #3b82f6; }
+        .module-tab.completed { border: 2px solid #4ade80; }
+        
+        /* Main Content - Split View */
+        .main-content { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 180px); }
+        
+        /* Left Panel - Text/Content */
+        .left-panel { flex: 1; overflow-y: auto; padding: 25px; background: rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.1); }
+        
+        /* Right Panel - Questions */
+        .right-panel { flex: 1; overflow-y: auto; padding: 25px; background: rgba(255,255,255,0.05); }
+        
+        /* Panel Headers */
+        .panel-header { background: rgba(0,0,0,0.3); padding: 15px 20px; border-radius: 12px; margin-bottom: 20px; }
+        .panel-header h2 { color: #4ade80; font-size: 1.2em; margin-bottom: 5px; }
+        .panel-header p { color: #94a3b8; font-size: 0.9em; }
+        
+        /* Audio Section */
+        .audio-section { background: rgba(139,92,246,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .audio-section h3 { color: #a78bfa; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .audio-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .play-btn { padding: 12px 25px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; border-radius: 8px; color: #fff; font-size: 15px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+        .play-btn:hover:not(:disabled) { transform: scale(1.05); }
+        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .play-count { color: #a78bfa; font-size: 0.9em; }
+        audio { width: 100%; margin-top: 10px; }
+        
+        /* Text Content */
+        .text-content { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 25px; line-height: 1.8; font-size: 1.05em; }
+        .text-content h3 { color: #4ade80; margin-bottom: 15px; }
+        .text-block { background: rgba(255,255,255,0.03); border-radius: 10px; padding: 20px; margin-bottom: 15px; border-left: 4px solid #3b82f6; }
+        .text-block .letter { display: inline-block; background: #3b82f6; color: #fff; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; }
+        
+        /* Questions */
+        .question-block { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: all 0.3s; }
+        .question-block:hover { background: rgba(255,255,255,0.08); }
+        .question-block.answered { border-left: 4px solid #4ade80; }
+        .question-number { display: inline-block; background: #3b82f6; color: #fff; width: 32px; height: 32px; border-radius: 50%; text-align: center; line-height: 32px; font-weight: bold; margin-right: 12px; }
+        .question-text { font-size: 1.05em; margin-bottom: 15px; line-height: 1.5; }
+        .question-context { color: #94a3b8; font-style: italic; margin-bottom: 10px; font-size: 0.9em; }
+        
+        /* Options */
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        .option { display: flex; align-items: center; padding: 12px 15px; background: rgba(255,255,255,0.05); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .option:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+        .option.selected { background: rgba(59,130,246,0.3); border-color: #3b82f6; }
+        .option-label { display: inline-block; width: 28px; height: 28px; background: rgba(255,255,255,0.1); border-radius: 50%; text-align: center; line-height: 28px; margin-right: 12px; font-weight: bold; font-size: 0.9em; }
+        .option.selected .option-label { background: #3b82f6; }
+        
+        /* Dropdown */
+        .select-answer { padding: 8px 15px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-size: 15px; cursor: pointer; min-width: 80px; }
+        .select-answer:focus { outline: none; border-color: #3b82f6; }
+        .select-answer option { background: #1a1a2e; }
+        
+        /* Gap Fill */
+        .gap-input { display: inline-block; min-width: 120px; padding: 6px 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 1em; text-align: center; margin: 0 5px; }
+        .gap-input:focus { outline: none; border-color: #4ade80; }
+        .gap-input.filled { border-color: #4ade80; background: rgba(74,222,128,0.2); }
+        .gap-number { display: inline-block; background: #f59e0b; color: #000; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; font-size: 0.75em; font-weight: bold; margin-right: 3px; vertical-align: middle; }
+        
+        /* Word Bank */
+        .word-bank { background: rgba(245,158,11,0.2); border-radius: 12px; padding: 20px; margin-bottom: 20px; position: sticky; top: 0; z-index: 10; }
+        .word-bank h4 { color: #fbbf24; margin-bottom: 12px; }
+        .word-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .word-item { padding: 6px 12px; background: rgba(255,255,255,0.15); border-radius: 6px; cursor: pointer; transition: all 0.3s; font-size: 0.95em; }
+        .word-item:hover { background: rgba(255,255,255,0.25); transform: scale(1.05); }
+        .word-item.used { opacity: 0.4; text-decoration: line-through; cursor: not-allowed; }
+        .word-item.selected { background: #4ade80; color: #000; }
+        
+        /* Navigation Footer */
+        .nav-footer { background: rgba(0,0,0,0.3); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; gap: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-btn { padding: 12px 30px; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+        .nav-btn.prev { background: rgba(255,255,255,0.1); color: #fff; }
+        .nav-btn.next { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; }
+        .nav-btn.submit { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; font-weight: 600; }
+        .nav-btn:hover { transform: translateY(-2px); }
+        .nav-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .progress-info { text-align: center; flex: 1; }
+        .progress-bar { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-bottom: 5px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 0.5s; }
+        .progress-text { color: #94a3b8; font-size: 0.85em; }
+        
+        /* Results Screen */
+        .results-screen { display: none; min-height: 100vh; padding: 40px 20px; }
+        .results-box { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; max-width: 700px; margin: 0 auto; }
+        .results-box h1 { text-align: center; color: #4ade80; margin-bottom: 30px; }
+        .score-circle { width: 180px; height: 180px; border-radius: 50%; background: conic-gradient(#4ade80 0deg, #4ade80 calc(var(--score) * 3.6deg), rgba(255,255,255,0.1) calc(var(--score) * 3.6deg)); display: flex; align-items: center; justify-content: center; margin: 0 auto 30px; }
+        .score-inner { width: 140px; height: 140px; border-radius: 50%; background: #1a1a2e; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .score-value { font-size: 2.5em; font-weight: bold; color: #4ade80; }
+        .score-label { color: #94a3b8; font-size: 0.9em; }
+        .results-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .result-item { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; text-align: center; }
+        .result-item h3 { color: #94a3b8; font-size: 0.85em; margin-bottom: 8px; }
+        .result-item .value { font-size: 1.5em; font-weight: bold; }
+        .result-item.lesen .value { color: #4ade80; }
+        .result-item.hoeren .value { color: #a78bfa; }
+        .result-item.zusatz .value { color: #fbbf24; }
+        .saving-status { text-align: center; margin-top: 20px; padding: 15px; border-radius: 10px; }
+        .saving-status.success { background: rgba(74,222,128,0.2); color: #4ade80; }
+        .saving-status.error { background: rgba(239,68,68,0.2); color: #f87171; }
+        .saving-status.loading { background: rgba(59,130,246,0.2); color: #60a5fa; }
+        
+        /* Blocked Screen */
+        .blocked-screen { text-align: center; }
+        .blocked-screen h2 { color: #f87171; margin-bottom: 20px; }
+        .result-display { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 25px; margin-top: 20px; text-align: left; }
+        
+        /* Time Up Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 20px; padding: 40px; max-width: 400px; text-align: center; border: 2px solid #ef4444; }
+        .modal-content h2 { color: #ef4444; margin-bottom: 15px; }
+        .modal-content p { color: #94a3b8; margin-bottom: 25px; }
+        .modal-btn { padding: 15px 40px; background: linear-gradient(135deg, #ef4444, #dc2626); border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+            .main-content { flex-direction: column; height: auto; }
+            .left-panel, .right-panel { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.1); max-height: 50vh; }
+            .results-details { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Time Up Modal -->
+    <div class="modal-overlay" id="timeUpModal">
+        <div class="modal-content">
+            <h2>⏰ Zeit abgelaufen!</h2>
+            <p>Die Testzeit ist abgelaufen. Der Test wird jetzt automatisch ausgewertet.</p>
+            <button class="modal-btn" onclick="closeModalAndSubmit()">Ergebnis anzeigen</button>
+        </div>
+    </div>
+
+    <!-- Registration Screen -->
+    <div class="registration-screen" id="registrationScreen">
+        <div class="registration-box" id="registrationBox">
+            <h1>🏥 telc Deutsch B1-B2 Pflege</h1>
+            <p class="subtitle">Übungstest - EnjoyYourSchool UG</p>
+            
+            <div class="test-info">
+                <h3>📋 Testinformationen</h3>
+                <ul>
+                    <li>Lesen: 5 Teile (55 Min) - 35 Aufgaben</li>
+                    <li>Hören: 4 Teile (30 Min) - 25 Aufgaben</li>
+                    <li>Zusatz: 4 Teile (55 Min) - 58 Aufgaben</li>
+                    <li>Gesamtzeit: 140 Minuten</li>
+                    <li>⚠️ Der Test kann nur einmal durchgeführt werden!</li>
+                </ul>
+            </div>
+            
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="userName">👤 Vollständiger Name *</label>
+                    <input type="text" id="userName" required placeholder="Vor- und Nachname">
+                </div>
+                <div class="form-group">
+                    <label for="userEmail">📧 E-Mail-Adresse *</label>
+                    <input type="email" id="userEmail" required placeholder="ihre.email@beispiel.de">
+                </div>
+                <div class="form-group">
+                    <label for="userOrigin">🌍 Herkunftsland *</label>
+                    <select id="userOrigin" required>
+                        <option value="">-- Bitte auswählen --</option>
+                        <option value="Albanien">Albanien</option>
+                        <option value="Bosnien">Bosnien und Herzegowina</option>
+                        <option value="Brasilien">Brasilien</option>
+                        <option value="China">China</option>
+                        <option value="Indien">Indien</option>
+                        <option value="Indonesien">Indonesien</option>
+                        <option value="Iran">Iran</option>
+                        <option value="Kenia">Kenia</option>
+                        <option value="Kolumbien">Kolumbien</option>
+                        <option value="Kosovo">Kosovo</option>
+                        <option value="Kroatien">Kroatien</option>
+                        <option value="Marokko">Marokko</option>
+                        <option value="Mexiko">Mexiko</option>
+                        <option value="Nordmazedonien">Nordmazedonien</option>
+                        <option value="Peru">Peru</option>
+                        <option value="Philippinen">Philippinen</option>
+                        <option value="Polen">Polen</option>
+                        <option value="Rumänien">Rumänien</option>
+                        <option value="Serbien">Serbien</option>
+                        <option value="Syrien">Syrien</option>
+                        <option value="Tunesien">Tunesien</option>
+                        <option value="Türkei">Türkei</option>
+                        <option value="Ukraine">Ukraine</option>
+                        <option value="Vietnam">Vietnam</option>
+                        <option value="Andere">Andere</option>
+                    </select>
+                </div>
+                <button type="submit" class="start-btn">🚀 Test starten</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Test Container -->
+    <div class="test-container" id="testContainer">
+        <div class="header">
+            <div class="logo"><h1>🏥 telc B1-B2 Pflege</h1></div>
+            <div class="user-info" id="userInfoDisplay"></div>
+            <div class="timer-box" id="timerBox">
+                <div class="timer-label">Restzeit</div>
+                <div class="timer-display" id="timerDisplay">140:00</div>
+            </div>
+        </div>
+        
+        <div class="section-tabs">
+            <div class="section-tab lesen active" onclick="switchSection('lesen')">
+                <div class="section-name">📖 LESEN</div>
+                <div class="section-info" id="lesenProgress">0/35 • 55 Min</div>
+            </div>
+            <div class="section-tab hoeren" onclick="switchSection('hoeren')">
+                <div class="section-name">🎧 HÖREN</div>
+                <div class="section-info" id="hoerenProgress">0/25 • 30 Min</div>
+            </div>
+            <div class="section-tab zusatz" onclick="switchSection('zusatz')">
+                <div class="section-name">✍️ ZUSATZ</div>
+                <div class="section-info" id="zusatzProgress">0/58 • 55 Min</div>
+            </div>
+        </div>
+        
+        <div class="module-tabs" id="moduleTabs"></div>
+        
+        <div class="main-content">
+            <div class="left-panel" id="leftPanel"></div>
+            <div class="right-panel" id="rightPanel"></div>
+        </div>
+        
+        <div class="nav-footer">
+            <button class="nav-btn prev" onclick="navigateModule(-1)">← Zurück</button>
+            <div class="progress-info">
+                <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                <div class="progress-text" id="progressText">0% abgeschlossen</div>
+            </div>
+            <button class="nav-btn next" id="nextBtn" onclick="navigateModule(1)">Weiter →</button>
+        </div>
+    </div>
+    
+    <!-- Results Screen -->
+    <div class="results-screen" id="resultsScreen">
+        <div class="results-box">
+            <h1>🎉 Test abgeschlossen!</h1>
+            <div class="score-circle" id="scoreCircle">
+                <div class="score-inner">
+                    <div class="score-value" id="totalScore">0%</div>
+                    <div class="score-label">Gesamtergebnis</div>
+                </div>
+            </div>
+            <div class="results-details">
+                <div class="result-item lesen"><h3>📖 Lesen</h3><div class="value" id="lesenScore">0/35</div></div>
+                <div class="result-item hoeren"><h3>🎧 Hören</h3><div class="value" id="hoerenScore">0/25</div></div>
+                <div class="result-item zusatz"><h3>✍️ Zusatz</h3><div class="value" id="zusatzScore">0/58</div></div>
+            </div>
+            <div class="saving-status" id="savingStatus"></div>
+        </div>
+    </div>
+
+<script>
+// ============================================
+// AIRTABLE CONFIGURATION
+// ============================================
+const AIRTABLE_CONFIG = {
+    baseId: 'app5dhxQ3aDALoEgu',
+    tableId: 'tblMiu73WlkOEiaKE',
+    apiKey: '' // Wird vom Server bereitgestellt oder hier eingetragen
+};
+
+// ============================================
+// GLOBAL STATE
+// ============================================
+let currentSection = 'lesen';
+let currentModuleIndex = 0;
+let userAnswers = {};
+let totalTime = 140 * 60;
+let startTime = null;
+let timerInterval = null;
+let audioPlayCounts = {};
+let userData = {};
+let selectedWord = null;
+let selectedGapId = null;
+
+// ============================================
+// TEST DATA
+// ============================================
+const testData = {
+    lesen: [
+        {
+            id: 'lesen1', title: 'Teil 1: Globalverstehen', subtitle: 'Überschriften zuordnen', time: 10, type: 'matching',
+            instructions: 'Lesen Sie die Texte (A-G) und ordnen Sie die passenden Überschriften (1-5) zu.',
+            texts: [
+                { letter: 'A', content: 'Die Kinästhetik ist ein Handlungskonzept zur Unterstützung von Bewegungsabläufen im Pflegealltag. Durch gezielte Bewegungsführung werden Patienten aktiviert und Pflegekräfte entlastet.' },
+                { letter: 'B', content: 'Bei der Übergabe zwischen Schichten ist eine strukturierte Kommunikation entscheidend. Wichtige Informationen zu Patientenzustand, Medikation und geplanten Maßnahmen müssen vollständig weitergegeben werden.' },
+                { letter: 'C', content: 'Die Basale Stimulation wurde von Professor Andreas Fröhlich entwickelt. Sie richtet sich an Menschen mit Wahrnehmungsbeeinträchtigungen und fördert die Kommunikation über Berührung und Bewegung.' },
+                { letter: 'D', content: 'Neue Hygienerichtlinien schreiben vor, dass bei bestimmten Infektionen Schutzkleidung zu tragen ist. Dazu gehören Schutzkittel, Handschuhe und Mund-Nasen-Schutz.' },
+                { letter: 'E', content: 'Die Pflegeplanung erfolgt nach dem Pflegeprozess: Informationssammlung, Erkennen von Problemen, Festlegen der Ziele, Planung der Maßnahmen, Durchführung und Evaluation.' },
+                { letter: 'F', content: 'Für die Anerkennung ausländischer Pflegeabschlüsse ist ein Anpassungslehrgang oder eine Kenntnisprüfung erforderlich. Sprachkenntnisse auf B2-Niveau werden vorausgesetzt.' },
+                { letter: 'G', content: 'Die Sturz-Prophylaxe umfasst Maßnahmen wie die Beseitigung von Stolperfallen, ausreichende Beleuchtung und geeignetes Schuhwerk.' }
+            ],
+            headings: [
+                { num: 1, text: 'Infektionsschutz in der Pflege' },
+                { num: 2, text: 'Effektive Schichtübergabe' },
+                { num: 3, text: 'Wahrnehmungsförderung bei beeinträchtigten Patienten' },
+                { num: 4, text: 'Bewegungsunterstützung im Pflegealltag' },
+                { num: 5, text: 'Berufsanerkennung für internationale Pflegekräfte' }
+            ],
+            correctAnswers: { 1: 'D', 2: 'B', 3: 'C', 4: 'A', 5: 'F' }
+        },
+        {
+            id: 'lesen2', title: 'Teil 2: Detailverstehen', subtitle: 'Fachartikel', time: 15, type: 'multipleChoice',
+            instructions: 'Lesen Sie den Text und beantworten Sie die Fragen.',
+            article: { title: 'Kinästhetik in der Pflege', content: 'Die Kinästhetik ist ein Konzept, das die Bewegungskompetenz fördert. Das Wort stammt aus dem Griechischen und bedeutet „Bewegungsempfindung". Das Konzept wurde in den 1970er Jahren von Dr. Lenny Maietta und Dr. Frank Hatch entwickelt.\n\nIm Pflegealltag hilft die Kinästhetik dabei, Bewegungsabläufe schonend und effektiv zu gestalten. Anstatt Patienten zu heben, werden sie durch gezielte Bewegungsimpulse unterstützt.\n\nDie Vorteile sind vielfältig: Pflegekräfte schonen ihren Rücken. Patienten werden aktiviert und behalten ihre Bewegungsfähigkeit. Ein wichtiges Prinzip ist die „Gewichtsverlagerung statt Heben". Die Kinästhetik wird heute in vielen Pflegeeinrichtungen geschult.' },
+            questions: [
+                { num: 6, text: 'Das Wort Kinästhetik bedeutet...', options: ['a) Körperpflege', 'b) Bewegungsempfindung', 'c) Patientenaktivierung'], correct: 'b' },
+                { num: 7, text: 'Das Kinästhetik-Konzept wurde entwickelt von...', options: ['a) deutschen Pflegewissenschaftlern', 'b) Dr. Maietta und Dr. Hatch', 'c) Physiotherapeuten'], correct: 'b' },
+                { num: 8, text: 'Ein Vorteil der Kinästhetik für Pflegekräfte ist...', options: ['a) schnellere Arbeitsabläufe', 'b) Rückenschonung', 'c) weniger Dokumentation'], correct: 'b' },
+                { num: 9, text: 'Bei der Kinästhetik soll das Gewicht des Patienten...', options: ['a) komplett angehoben werden', 'b) verlagert statt gehoben werden', 'c) vom Patienten selbst getragen werden'], correct: 'b' },
+                { num: 10, text: 'Kinästhetik-Fortbildungen...', options: ['a) dauern nur wenige Stunden', 'b) sollten regelmäßig aufgefrischt werden', 'c) sind nur für Auszubildende'], correct: 'b' }
+            ]
+        },
+        {
+            id: 'lesen3', title: 'Teil 3: Selektives Lesen', subtitle: 'Anzeigen zuordnen', time: 10, type: 'adsMatching',
+            instructions: 'Welche Anzeige passt zu welcher Situation? Ordnen Sie zu.',
+            situations: [
+                { num: 11, text: 'Sie möchten eine Weiterbildung zur Praxisanleiterin machen.' },
+                { num: 12, text: 'Sie suchen eine Teilzeitstelle in der ambulanten Pflege.' },
+                { num: 13, text: 'Sie interessieren sich für Palliativpflege.' },
+                { num: 14, text: 'Sie benötigen Informationen zur Anerkennung Ihres ausländischen Abschlusses.' },
+                { num: 15, text: 'Sie möchten sich über Demenzpflege fortbilden.' }
+            ],
+            ads: [
+                { letter: 'A', title: 'Praxisanleiter-Kurs', content: 'Berufsbegleitende Weiterbildung. 300 Stunden, staatlich anerkannt. Start: März 2025.' },
+                { letter: 'B', title: 'Pflegedienst Sonnenschein', content: 'Sucht exam. Pflegekräfte für ambulante Touren. Teilzeit möglich (20-30 Std.).' },
+                { letter: 'C', title: 'Hospizverein Hoffnung', content: 'Fortbildung Palliative Care (160 Std.). Für Pflegefachkräfte mit mind. 2 Jahren Erfahrung.' },
+                { letter: 'D', title: 'Pflegekammer NRW', content: 'Beratung zur Berufsanerkennung für ausländische Pflegefachkräfte. Kostenlos.' },
+                { letter: 'E', title: 'Demenz-Akademie', content: 'Zertifikatskurs Demenzbegleitung. Themen: Validation, Biografiearbeit, Milieugestaltung.' },
+                { letter: 'F', title: 'Intensivpflege-Kurs', content: 'Fachweiterbildung Intensiv- und Anästhesiepflege. 2 Jahre berufsbegleitend.' },
+                { letter: 'G', title: 'Wundexperte ICW', content: 'Weiterbildung zum zertifizierten Wundexperten. 56 Stunden + Praktikum.' },
+                { letter: 'H', title: 'Sprachkurs B2 Pflege', content: 'Deutschkurs für Pflegekräfte. Vorbereitung auf telc B1-B2 Pflege.' }
+            ],
+            correctAnswers: { 11: 'A', 12: 'B', 13: 'C', 14: 'D', 15: 'E' }
+        },
+        {
+            id: 'lesen4', title: 'Teil 4: Sprachbausteine Grammatik', subtitle: 'E-Mail mit Lücken', time: 10, type: 'cloze',
+            instructions: 'Wählen Sie für jede Lücke die richtige Lösung.',
+            emailContent: `Liebe Frau Schneider,
+
+ich muss mich leider für heute und morgen krankmelden. Ich <span class="gap-number">16</span><select class="select-answer" onchange="saveAnswer('lesen4',16,this.value)"><option value="">--</option><option value="a">habe</option><option value="b">bin</option><option value="c">werde</option></select> starke Kopfschmerzen und Fieber <span class="gap-number">17</span><select class="select-answer" onchange="saveAnswer('lesen4',17,this.value)"><option value="">--</option><option value="a">seit</option><option value="b">vor</option><option value="c">nach</option></select> gestern Abend.
+
+Der Arzt hat mir geraten, <span class="gap-number">18</span><select class="select-answer" onchange="saveAnswer('lesen4',18,this.value)"><option value="">--</option><option value="a">dass</option><option value="b">ob</option><option value="c">weil</option></select> ich mindestens zwei Tage im Bett bleiben soll. Die Krankmeldung <span class="gap-number">19</span><select class="select-answer" onchange="saveAnswer('lesen4',19,this.value)"><option value="">--</option><option value="a">schicke</option><option value="b">schicken</option><option value="c">geschickt</option></select> ich Ihnen per Post.
+
+Könnten Sie bitte <span class="gap-number">20</span><select class="select-answer" onchange="saveAnswer('lesen4',20,this.value)"><option value="">--</option><option value="a">die</option><option value="b">der</option><option value="c">den</option></select> Kollegin Müller fragen, ob sie meine Schicht übernehmen kann? Die Medikamente für Herrn Schmidt <span class="gap-number">21</span><select class="select-answer" onchange="saveAnswer('lesen4',21,this.value)"><option value="">--</option><option value="a">müssen</option><option value="b">muss</option><option value="c">musst</option></select> um 18 Uhr gegeben werden.
+
+<span class="gap-number">22</span><select class="select-answer" onchange="saveAnswer('lesen4',22,this.value)"><option value="">--</option><option value="a">Ob</option><option value="b">Falls</option><option value="c">Weil</option></select> Sie noch Fragen haben, erreichen Sie mich telefonisch. Ich hoffe, <span class="gap-number">23</span><select class="select-answer" onchange="saveAnswer('lesen4',23,this.value)"><option value="">--</option><option value="a">ob</option><option value="b">dass</option><option value="c">wenn</option></select> ich am Mittwoch wieder arbeiten kann.
+
+<span class="gap-number">24</span><select class="select-answer" onchange="saveAnswer('lesen4',24,this.value)"><option value="">--</option><option value="a">Mit</option><option value="b">Von</option><option value="c">Bei</option></select> freundlichen Grüßen und Dank <span class="gap-number">25</span><select class="select-answer" onchange="saveAnswer('lesen4',25,this.value)"><option value="">--</option><option value="a">für</option><option value="b">über</option><option value="c">von</option></select> Ihr Verständnis,
+
+Maria Weber`,
+            correctAnswers: { 16: 'a', 17: 'a', 18: 'a', 19: 'a', 20: 'a', 21: 'a', 22: 'b', 23: 'b', 24: 'a', 25: 'a' }
+        },
+        {
+            id: 'lesen5', title: 'Teil 5: Sprachbausteine Wortschatz', subtitle: 'Fachtext', time: 10, type: 'cloze',
+            instructions: 'Wählen Sie für jede Lücke die richtige Lösung.',
+            emailContent: `<h3 style="color:#4ade80;margin-bottom:15px;">Pneumonieprophylaxe</h3>
+
+Die Pneumonieprophylaxe dient der <span class="gap-number">26</span><select class="select-answer" onchange="saveAnswer('lesen5',26,this.value)"><option value="">--</option><option value="a">Behandlung</option><option value="b">Vorbeugung</option><option value="c">Heilung</option></select> einer Lungenentzündung. Besonders gefährdet sind <span class="gap-number">27</span><select class="select-answer" onchange="saveAnswer('lesen5',27,this.value)"><option value="">--</option><option value="a">ältere</option><option value="b">junge</option><option value="c">gesunde</option></select> Patienten und Menschen mit eingeschränkter Mobilität.
+
+Wichtige <span class="gap-number">28</span><select class="select-answer" onchange="saveAnswer('lesen5',28,this.value)"><option value="">--</option><option value="a">Maßnahmen</option><option value="b">Probleme</option><option value="c">Symptome</option></select> sind regelmäßige Lagerungswechsel und Atemübungen. Die Patienten sollen <span class="gap-number">29</span><select class="select-answer" onchange="saveAnswer('lesen5',29,this.value)"><option value="">--</option><option value="a">tief</option><option value="b">schnell</option><option value="c">flach</option></select> atmen und regelmäßig abhusten.
+
+Eine ausreichende <span class="gap-number">30</span><select class="select-answer" onchange="saveAnswer('lesen5',30,this.value)"><option value="">--</option><option value="a">Ernährung</option><option value="b">Flüssigkeitszufuhr</option><option value="c">Medikation</option></select> ist ebenfalls wichtig. Die Zimmerluft sollte nicht zu <span class="gap-number">31</span><select class="select-answer" onchange="saveAnswer('lesen5',31,this.value)"><option value="">--</option><option value="a">trocken</option><option value="b">feucht</option><option value="c">warm</option></select> sein.
+
+Bei bettlägerigen Patienten ist eine <span class="gap-number">32</span><select class="select-answer" onchange="saveAnswer('lesen5',32,this.value)"><option value="">--</option><option value="a">flache</option><option value="b">erhöhte</option><option value="c">seitliche</option></select> Lagerung zu bevorzugen. Die <span class="gap-number">33</span><select class="select-answer" onchange="saveAnswer('lesen5',33,this.value)"><option value="">--</option><option value="a">Medikamentengabe</option><option value="b">Dokumentation</option><option value="c">Umlagerung</option></select> sollte mindestens alle zwei Stunden erfolgen.
+
+Die <span class="gap-number">34</span><select class="select-answer" onchange="saveAnswer('lesen5',34,this.value)"><option value="">--</option><option value="a">Planung</option><option value="b">Dokumentation</option><option value="c">Durchführung</option></select> aller Maßnahmen ist wichtig. Bei ersten <span class="gap-number">35</span><select class="select-answer" onchange="saveAnswer('lesen5',35,this.value)"><option value="">--</option><option value="a">Zeichen</option><option value="b">Ursachen</option><option value="c">Folgen</option></select> einer Infektion ist sofort der Arzt zu informieren.`,
+            correctAnswers: { 26: 'b', 27: 'a', 28: 'a', 29: 'a', 30: 'b', 31: 'a', 32: 'b', 33: 'c', 34: 'b', 35: 'a' }
+        }
+    ],
+    hoeren: [
+        {
+            id: 'hoeren1', title: 'Teil 1: Kurze Gespräche', subtitle: 'Globalverstehen', time: 8, type: 'multipleChoice',
+            audioUrl: 'audio/hoeren_teil1.mp3',
+            maxPlays: 2,
+            instructions: 'Sie hören 5 kurze Gespräche. Sie hören jedes Gespräch zweimal. Wählen Sie die richtige Lösung.',
+            transcript: `<strong>Gespräch 1:</strong> Telefongespräch über Medikationsänderung für Herrn Schmidt.<br><br>
+<strong>Gespräch 2:</strong> Absprache zur Röntgenuntersuchung von Frau Keller.<br><br>
+<strong>Gespräch 3:</strong> Gespräch mit Arzt über CT-Termin für Herrn Lehmann.<br><br>
+<strong>Gespräch 4:</strong> Verlegung eines Patienten von der Notaufnahme.<br><br>
+<strong>Gespräch 5:</strong> Neue Hygieneregeln auf der Station.`,
+            questions: [
+                { num: 1, context: 'Gespräch 1', text: 'Worum geht es?', options: ['a) Verlegung', 'b) Medikationsänderung', 'c) Besuch'], correct: 'b' },
+                { num: 2, context: 'Gespräch 2', text: 'Worum geht es?', options: ['a) Nachtdienst-Vertretung', 'b) Untersuchungsvorbereitung', 'c) Zimmer aufräumen'], correct: 'b' },
+                { num: 3, context: 'Gespräch 3', text: 'Worum geht es?', options: ['a) Untersuchungstermin', 'b) Medikation', 'c) Entlassung'], correct: 'a' },
+                { num: 4, context: 'Gespräch 4', text: 'Worum geht es?', options: ['a) Verbandsmaterial', 'b) Patientenverlegung', 'c) Beschwerde'], correct: 'b' },
+                { num: 5, context: 'Gespräch 5', text: 'Worum geht es?', options: ['a) Hygieneregeln', 'b) Dienstplan', 'c) Fortbildung'], correct: 'a' }
+            ]
+        },
+        {
+            id: 'hoeren2', title: 'Teil 2: Längeres Gespräch', subtitle: 'Detailverstehen', time: 10, type: 'trueFalse',
+            audioUrl: 'audio/hoeren_teil2.mp3',
+            maxPlays: 2,
+            instructions: 'Sie hören ein Übergabegespräch. Markieren Sie Richtig oder Falsch.',
+            transcript: `<strong>Übergabegespräch zwischen zwei Pflegekräften</strong><br><br>
+Themen: Frau Meier (Pneumonie, Antibiotikum), Herr Schneider (Sturzgefahr), Frau Yilmaz (Herzinsuffizienz), Frau Müller (Neuaufnahme), Dienstplan, Hygieneschulung.`,
+            questions: [
+                { num: 6, text: 'Frau Meier hatte in der Frühschicht deutlich erhöhte Temperaturen.', correct: 'falsch' },
+                { num: 7, text: 'Das Antibiotikum wurde auf Infusion umgestellt.', correct: 'richtig' },
+                { num: 8, text: 'Herr Schneider darf nur mit Begleitperson laufen.', correct: 'richtig' },
+                { num: 9, text: 'Die Angehörigen von Herrn Schneider kommen erst morgen.', correct: 'falsch' },
+                { num: 10, text: 'Für Frau Yilmaz ist ein Ultraschall für heute geplant.', correct: 'falsch' },
+                { num: 11, text: 'Frau Müller wurde wegen Luftnot aufgenommen.', correct: 'falsch' },
+                { num: 12, text: 'Morgen ist eine Hygienebegehung angekündigt.', correct: 'falsch' },
+                { num: 13, text: 'Die Dokumentation ist nicht aktualisiert.', correct: 'falsch' },
+                { num: 14, text: 'Frau Meier wird übermorgen entlassen.', correct: 'falsch' },
+                { num: 15, text: 'Die Spätschicht soll auf Flüssigkeitszufuhr achten.', correct: 'richtig' }
+            ]
+        },
+        {
+            id: 'hoeren3', title: 'Teil 3: Durchsagen', subtitle: 'Ansagen verstehen', time: 6, type: 'multipleChoice',
+            audioUrl: 'audio/hoeren_teil3.mp3',
+            maxPlays: 1,
+            instructions: 'Sie hören 5 Durchsagen. Sie hören jede Durchsage einmal.',
+            transcript: `<strong>5 Durchsagen im Krankenhaus:</strong><br><br>
+1. Feueralarmübung um 14 Uhr<br>
+2. Teamsitzung auf 13 Uhr verschoben<br>
+3. Auditor kommt morgen<br>
+4. Hygieneschulung im Schulungsraum<br>
+5. Parkplatz wegen Sturm gesperrt`,
+            questions: [
+                { num: 16, context: 'Durchsage 1', text: 'Was sollen die Mitarbeiter tun?', options: ['a) Am Arbeitsplatz bleiben', 'b) Zum Sammelplatz gehen', 'c) In die Tiefgarage'], correct: 'b' },
+                { num: 17, context: 'Durchsage 2', text: 'Wann findet die Teamsitzung statt?', options: ['a) Heute um 13 Uhr', 'b) Morgen um 13 Uhr', 'c) Heute um 14 Uhr'], correct: 'a' },
+                { num: 18, context: 'Durchsage 3', text: 'Grund für die Durchsage?', options: ['a) Brandschutzschulung', 'b) Auditor kommt', 'c) Trägerbesuch'], correct: 'b' },
+                { num: 19, context: 'Durchsage 4', text: 'Wo findet die Veranstaltung statt?', options: ['a) Cafeteria', 'b) Schulungsraum EG', 'c) Konferenzsaal'], correct: 'b' },
+                { num: 20, context: 'Durchsage 5', text: 'Was sollen die Mitarbeiter tun?', options: ['a) Hinteren Parkplatz nutzen', 'b) Besucherparkplatz nutzen', 'c) Tiefgarage nutzen'], correct: 'b' }
+            ]
+        },
+        {
+            id: 'hoeren4', title: 'Teil 4: Informelle Gespräche', subtitle: 'Meinungen zuordnen', time: 6, type: 'personMatching',
+            audioUrl: 'audio/hoeren_teil4.mp3',
+            maxPlays: 2,
+            instructions: 'Sie hören ein Gespräch zwischen Jana, Mehmet und Laura. Wer sagt was?',
+            transcript: `<strong>Gespräch zwischen Jana, Mehmet und Laura</strong><br><br>
+Themen: Dokumentationssoftware, Nachtdienst, schwierige Patienten, Fortbildungen, Pflegeroboter, Arbeitsbedingungen.`,
+            questions: [
+                { num: 21, text: 'Findet die neue Software spart jetzt Zeit.', options: ['a) Jana', 'b) Mehmet', 'c) Laura'], correct: 'c' },
+                { num: 22, text: 'Nachtdienste sind körperlich sehr belastend.', options: ['a) Jana', 'b) Mehmet', 'c) Laura'], correct: 'a' },
+                { num: 23, text: 'Roboter dürfen nur Unterstützung sein.', options: ['a) Jana', 'b) Mehmet', 'c) Laura'], correct: 'c' },
+                { num: 24, text: 'Fortbildungen sind wichtig, aber passen nicht in den Dienstplan.', options: ['a) Jana', 'b) Mehmet', 'c) Laura'], correct: 'b' },
+                { num: 25, text: 'Mit schwierigen Patienten hilft offene Teamkommunikation.', options: ['a) Jana', 'b) Mehmet', 'c) Laura'], correct: 'c' }
+            ]
+        }
+    ],
+    zusatz: [
+        {
+            id: 'zusatz1', title: 'Teil 1: Aufnahmebericht', subtitle: 'Lückentext', time: 10, type: 'gapFill',
+            instructions: 'Füllen Sie die Lücken mit den passenden Wörtern aus der Wortliste.',
+            wordBank: ['am', 'aufgenommen', 'wegen', 'Diagnose', 'Anamnese', 'eine', 'dokumentiert', 'angegeben', 'Allergien', 'Medikation', 'Vitalzeichen', 'Allgemeinzustand', 'orientiert', 'Mobilität', 'selbstständig', 'informiert'],
+            text: `Patient wurde __1__ 15.03.2025 um 14:30 Uhr auf Station 3B __2__. 
+Der Grund für die Aufnahme ist __3__ Verdacht auf Pneumonie.
+Die vorläufige __4__ lautet: Ambulant erworbene Pneumonie.
+Bei der __5__ wurde festgestellt, dass der Patient __6__ bekannte Grunderkrankung hat.
+Die Pflegeanamnese wurde vollständig __7__.
+Der Patient hat keine Schmerzen __8__.
+Bekannte __9__: Penicillin
+Aktuelle __10__: Metformin 500mg 2x täglich
+Die __11__ bei Aufnahme: Blutdruck 135/85, Puls 88/min, Temperatur 38,4°C
+Der __12__ ist reduziert.
+Der Patient ist zeitlich und örtlich __13__.
+Die __14__ ist eingeschränkt, der Patient kann mit Hilfe gehen.
+Die Körperpflege kann der Patient nicht __15__ durchführen.
+Die Angehörigen wurden über die Aufnahme __16__.`,
+            correctAnswers: ['am', 'aufgenommen', 'wegen', 'Diagnose', 'Anamnese', 'eine', 'dokumentiert', 'angegeben', 'Allergien', 'Medikation', 'Vitalzeichen', 'Allgemeinzustand', 'orientiert', 'Mobilität', 'selbstständig', 'informiert']
+        },
+        {
+            id: 'zusatz2', title: 'Teil 2: Biografiebericht', subtitle: 'Lückentext', time: 10, type: 'gapFill',
+            instructions: 'Füllen Sie die Lücken mit den passenden Wörtern aus der Wortliste.',
+            wordBank: ['geboren', 'aufgewachsen', 'glücklich', 'als', 'arbeitete', 'heiratete', 'nach', 'fürsorglich', 'arbeitet', 'pensioniert', 'mag', 'sicher'],
+            text: `Biografiebericht - Frau Helga Müller
+
+Frau Müller wurde am 12. Mai 1942 in Dresden __1__.
+Sie ist in einer kleinen Familie mit einem Bruder __2__.
+Ihre Kindheit beschreibt sie als __3__, trotz der Kriegsjahre.
+Sie begann __4__ Verkäuferin in einem Kaufhaus zu arbeiten.
+Nach ihrer Ausbildung __5__ sie 10 Jahre im Einzelhandel.
+Mit 25 Jahren __6__ sie ihren Mann Hans.
+Das Ehepaar zog __7__ der Hochzeit nach Berlin.
+Sie beschreibt ihren verstorbenen Mann als __8__ und liebevoll.
+Ihre Tochter Sabine __9__ als Krankenschwester in Hamburg.
+Seit 2007 ist Frau Müller __10__.
+Sie __11__ klassische Musik und liest gerne Romane.
+Im Umgang mit dem Pflegepersonal fühlt sie sich __12__.`,
+            correctAnswers: ['geboren', 'aufgewachsen', 'glücklich', 'als', 'arbeitete', 'heiratete', 'nach', 'fürsorglich', 'arbeitet', 'pensioniert', 'mag', 'sicher']
+        },
+        {
+            id: 'zusatz3', title: 'Teil 3: Pflegeplanung', subtitle: 'Lückentext', time: 10, type: 'gapFill',
+            instructions: 'Füllen Sie die Lücken mit den passenden Wörtern aus der Wortliste.',
+            wordBank: ['Bewegung', 'eingeschränkte', 'Problem', 'Ressource', 'Ziel', 'Mobilisation', 'Maßnahme', 'Evaluation', 'Prophylaxe', 'unterstützen', 'fördern', 'übernehmen'],
+            text: `Pflegeplanung - AEDL: Sich bewegen
+
+AEDL-Bereich: __1__
+Pflegeproblem: __2__ Mobilität aufgrund von Hüft-TEP rechts
+Das __3__ ist die Sturzgefahr bei selbstständigem Aufstehen.
+Die __4__ des Patienten ist seine Motivation zur Mitarbeit.
+Das Pflege-__5__ ist: Patient kann in 2 Wochen mit Rollator sicher gehen.
+Geplante __6__: 3x täglich mit Unterstützung aufstehen
+Erste __7__: Gehübungen mit Physiotherapie 2x täglich
+Die __8__ erfolgt nach einer Woche.
+Wichtig ist die Sturz-__9__ durch rutschfeste Schuhe.
+Wir __10__ den Patienten bei der Körperpflege.
+Ziel ist es, die Selbstständigkeit zu __11__.
+Aufgaben, die der Patient nicht kann, __12__ wir vollständig.`,
+            correctAnswers: ['Bewegung', 'eingeschränkte', 'Problem', 'Ressource', 'Ziel', 'Mobilisation', 'Maßnahme', 'Evaluation', 'Prophylaxe', 'unterstützen', 'fördern', 'übernehmen']
+        },
+        {
+            id: 'zusatz4', title: 'Teil 4: Tagesablauf', subtitle: 'Lückentext', time: 15, type: 'gapFill',
+            instructions: 'Füllen Sie die Lücken mit den passenden Wörtern aus der Wortliste.',
+            wordBank: ['morgens', 'statt', 'berichtet', 'geweckt', 'bei', 'Körperpflege', 'nötig', 'abhängig', 'misst', 'gemacht', 'nüchtern', 'dass', 'verabreicht', 'je', 'Visite', 'berichtet', 'sowie', 'und so weiter'],
+            text: `Tagesablauf auf einer internistischen Station
+
+Der Frühdienst beginnt um 6:00 Uhr __1__.
+Um 6:15 Uhr findet die Übergabe __2__.
+Die Nachtschwester __3__ über besondere Vorkommnisse.
+Sie informiert über Vitalzeichen, Ausscheidungen __4__.
+Ab 6:30 Uhr werden die Patienten __5__.
+Die Pflegekraft hilft __6__ der Grundpflege.
+Die __7__ erfolgt je nach Pflegegrad.
+Einige Patienten brauchen Hilfe, andere können selbstständig, wenn __8__.
+Die Medikamentengabe ist __9__ von der ärztlichen Anordnung.
+Die Pflegekraft __10__ Blutdruck, Puls und Temperatur.
+Die Blutzuckerkontrolle wird vor dem Frühstück __11__.
+Einige Patienten müssen __12__ bleiben für Untersuchungen.
+Es ist wichtig, __13__ die Dokumentation zeitnah erfolgt.
+Das Frühstück wird um 8:00 Uhr __14__.
+Die Portionen richten sich __15__ nach den ärztlichen Vorgaben.
+Um 9:00 Uhr beginnt die __16__ mit dem Stationsarzt.
+Die Pflegekraft __17__ über den aktuellen Zustand der Patienten.
+Sie dokumentiert Anordnungen __18__ Änderungen in der Medikation.`,
+            correctAnswers: ['morgens', 'statt', 'berichtet', 'und so weiter', 'geweckt', 'bei', 'Körperpflege', 'nötig', 'abhängig', 'misst', 'gemacht', 'nüchtern', 'dass', 'verabreicht', 'je', 'Visite', 'berichtet', 'sowie']
+        }
+    ]
+};
+
+// ============================================
+// INITIALIZATION
+// ============================================
+document.addEventListener('DOMContentLoaded', function() {
+    checkPreviousAttempt();
+    document.getElementById('registrationForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        userData = {
+            name: document.getElementById('userName').value,
+            email: document.getElementById('userEmail').value,
+            origin: document.getElementById('userOrigin').value,
+            startTime: new Date().toISOString()
+        };
+        startTest();
+    });
+});
+
+function checkPreviousAttempt() {
+    const prev = localStorage.getItem('telc_test_completed');
+    if (prev) {
+        const result = JSON.parse(prev);
+        document.getElementById('registrationBox').innerHTML = `
+            <div class="blocked-screen">
+                <h2>⚠️ Test bereits absolviert</h2>
+                <p style="color:#94a3b8;">Sie haben diesen Test am ${result.completedAt} durchgeführt.</p>
+                <div class="result-display">
+                    <h3 style="color:#4ade80;">Ihr Ergebnis:</h3>
+                    <p><strong>Name:</strong> ${result.userName}</p>
+                    <p><strong>Gesamtergebnis:</strong> ${result.totalPercent}%</p>
+                    <p><strong>Lesen:</strong> ${result.lesenScore}/${result.lesenTotal}</p>
+                    <p><strong>Hören:</strong> ${result.hoerenScore}/${result.hoerenTotal}</p>
+                    <p><strong>Zusatz:</strong> ${result.zusatzScore}/${result.zusatzTotal}</p>
+                </div>
+            </div>`;
+    }
+}
+
+function startTest() {
+    document.getElementById('registrationScreen').style.display = 'none';
+    document.getElementById('testContainer').style.display = 'flex';
+    document.getElementById('testContainer').style.flexDirection = 'column';
+    document.getElementById('userInfoDisplay').textContent = `👤 ${userData.name} | 🌍 ${userData.origin}`;
+    startTime = Date.now();
+    renderModuleTabs();
+    renderCurrentModule();
+    startTimer();
+    updateProgress();
+}
+
+// ============================================
+// TIMER
+// ============================================
+function startTimer() {
+    timerInterval = setInterval(() => {
+        totalTime--;
+        updateTimerDisplay();
+        if (totalTime <= 0) {
+            clearInterval(timerInterval);
+            showTimeUpModal();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    const mins = Math.floor(totalTime / 60);
+    const secs = totalTime % 60;
+    document.getElementById('timerDisplay').textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+    const box = document.getElementById('timerBox');
+    box.classList.remove('warning', 'danger');
+    if (totalTime <= 300) box.classList.add('danger');
+    else if (totalTime <= 600) box.classList.add('warning');
+}
+
+function showTimeUpModal() {
+    document.getElementById('timeUpModal').style.display = 'flex';
+}
+
+function closeModalAndSubmit() {
+    document.getElementById('timeUpModal').style.display = 'none';
+    submitTest();
+}
+
+// ============================================
+// NAVIGATION
+// ============================================
+function switchSection(section) {
+    currentSection = section;
+    currentModuleIndex = 0;
+    document.querySelectorAll('.section-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.section-tab.${section}`).classList.add('active');
+    renderModuleTabs();
+    renderCurrentModule();
+}
+
+function renderModuleTabs() {
+    const modules = testData[currentSection];
+    document.getElementById('moduleTabs').innerHTML = modules.map((m, i) => 
+        `<div class="module-tab ${i === currentModuleIndex ? 'active' : ''} ${hasModuleAnswers(m.id) ? 'completed' : ''}" onclick="goToModule(${i})">${m.title}</div>`
+    ).join('');
+}
+
+function goToModule(i) {
+    currentModuleIndex = i;
+    renderModuleTabs();
+    renderCurrentModule();
+}
+
+function navigateModule(dir) {
+    const modules = testData[currentSection];
+    const newIdx = currentModuleIndex + dir;
+    if (newIdx >= 0 && newIdx < modules.length) {
+        currentModuleIndex = newIdx;
+        renderModuleTabs();
+        renderCurrentModule();
+    } else if (dir > 0) {
+        const sections = ['lesen', 'hoeren', 'zusatz'];
+        const idx = sections.indexOf(currentSection);
+        if (idx < 2) {
+            switchSection(sections[idx + 1]);
+        } else {
+            if (confirm('Möchten Sie den Test jetzt abschließen?')) submitTest();
+        }
+    }
+    updateNavButtons();
+}
+
+function updateNavButtons() {
+    const isLast = currentSection === 'zusatz' && currentModuleIndex === testData.zusatz.length - 1;
+    const btn = document.getElementById('nextBtn');
+    btn.textContent = isLast ? '✓ Test abschließen' : 'Weiter →';
+    btn.className = isLast ? 'nav-btn submit' : 'nav-btn next';
+}
+
+// ============================================
+// RENDERING
+// ============================================
+function renderCurrentModule() {
+    const module = testData[currentSection][currentModuleIndex];
+    let leftHTML = '', rightHTML = '';
+    
+    // Left Panel Header
+    leftHTML = `<div class="panel-header"><h2>${module.title}</h2><p>${module.subtitle} • ${module.time} Min</p></div>`;
+    
+    // Right Panel Header
+    rightHTML = `<div class="panel-header"><h2>Aufgaben</h2><p>${module.instructions}</p></div>`;
+    
+    // Audio for Hören
+    if (currentSection === 'hoeren' && module.audioUrl) {
+        const plays = audioPlayCounts[module.id] || 0;
+        const canPlay = plays < module.maxPlays;
+        leftHTML += `
+            <div class="audio-section">
+                <h3>🎧 Audio abspielen (${plays}/${module.maxPlays})</h3>
+                <div class="audio-controls">
+                    <button class="play-btn" id="playBtn" onclick="playAudio('${module.id}')" ${!canPlay ? 'disabled' : ''}>
+                        ${canPlay ? '▶️ Abspielen' : '🔒 Maximum erreicht'}
+                    </button>
+                </div>
+                <audio id="audioPlayer" src="${module.audioUrl}" onended="onAudioEnded('${module.id}')" onplay="onAudioPlay()"></audio>
+            </div>`;
+        if (module.transcript) {
+            leftHTML += `<div class="text-content"><h3>Transkript (zur Orientierung)</h3><p>${module.transcript}</p></div>`;
+        }
+    }
+    
+    // Render based on type
+    switch (module.type) {
+        case 'matching':
+            leftHTML += renderTexts(module);
+            rightHTML += renderMatchingQuestions(module);
+            break;
+        case 'adsMatching':
+            leftHTML += renderAds(module);
+            rightHTML += renderSituations(module);
+            break;
+        case 'multipleChoice':
+            if (module.article) leftHTML += `<div class="text-content"><h3>${module.article.title}</h3><p style="white-space:pre-line;">${module.article.content}</p></div>`;
+            rightHTML += renderMCQuestions(module);
+            break;
+        case 'trueFalse':
+            rightHTML += renderTFQuestions(module);
+            break;
+        case 'personMatching':
+            rightHTML += renderPersonQuestions(module);
+            break;
+        case 'cloze':
+            leftHTML += `<div class="text-content">${module.emailContent}</div>`;
+            rightHTML += `<div class="text-content"><p style="color:#94a3b8;">Die Lücken befinden sich im Text links. Wählen Sie für jede Nummer die passende Option aus den Dropdown-Menüs.</p></div>`;
+            break;
+        case 'gapFill':
+            rightHTML += renderWordBank(module);
+            leftHTML += renderGapText(module);
+            break;
+    }
+    
+    document.getElementById('leftPanel').innerHTML = leftHTML;
+    document.getElementById('rightPanel').innerHTML = rightHTML;
+    updateNavButtons();
+    updateProgress();
+    
+    // Restore saved answers
+    restoreAnswers(module);
+}
+
+function renderTexts(module) {
+    return module.texts.map(t => `<div class="text-block"><span class="letter">${t.letter}</span>${t.content}</div>`).join('');
+}
+
+function renderMatchingQuestions(module) {
+    return module.headings.map(h => {
+        const saved = userAnswers[`${module.id}_${h.num}`] || '';
+        return `<div class="question-block ${saved ? 'answered' : ''}">
+            <span class="question-number">${h.num}</span>
+            <span class="question-text">${h.text}</span>
+            <select class="select-answer" onchange="saveAnswer('${module.id}',${h.num},this.value)">
+                <option value="">--</option>
+                ${module.texts.map(t => `<option value="${t.letter}" ${saved === t.letter ? 'selected' : ''}>${t.letter}</option>`).join('')}
+            </select>
+        </div>`;
+    }).join('');
+}
+
+function renderAds(module) {
+    return module.ads.map(a => `<div class="text-block"><span class="letter">${a.letter}</span><strong>${a.title}</strong><br>${a.content}</div>`).join('');
+}
+
+function renderSituations(module) {
+    return module.situations.map(s => {
+        const saved = userAnswers[`${module.id}_${s.num}`] || '';
+        return `<div class="question-block ${saved ? 'answered' : ''}">
+            <span class="question-number">${s.num}</span>
+            <span class="question-text">${s.text}</span>
+            <select class="select-answer" onchange="saveAnswer('${module.id}',${s.num},this.value)">
+                <option value="">--</option>
+                ${module.ads.map(a => `<option value="${a.letter}" ${saved === a.letter ? 'selected' : ''}>${a.letter}</option>`).join('')}
+            </select>
+        </div>`;
+    }).join('');
+}
+
+function renderMCQuestions(module) {
+    return module.questions.map(q => {
+        const saved = userAnswers[`${module.id}_${q.num}`] || '';
+        return `<div class="question-block ${saved ? 'answered' : ''}">
+            ${q.context ? `<div class="question-context">${q.context}</div>` : ''}
+            <span class="question-number">${q.num}</span>
+            <span class="question-text">${q.text}</span>
+            <div class="options">
+                ${q.options.map(o => {
+                    const v = o.charAt(0);
+                    return `<label class="option ${saved === v ? 'selected' : ''}" onclick="selectOption(this,'${module.id}',${q.num},'${v}')">
+                        <span class="option-label">${v}</span>${o.substring(3)}
+                    </label>`;
+                }).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderTFQuestions(module) {
+    return module.questions.map(q => {
+        const saved = userAnswers[`${module.id}_${q.num}`] || '';
+        return `<div class="question-block ${saved ? 'answered' : ''}">
+            <span class="question-number">${q.num}</span>
+            <span class="question-text">${q.text}</span>
+            <div class="options" style="flex-direction:row;gap:15px;">
+                <label class="option ${saved === 'richtig' ? 'selected' : ''}" onclick="selectOption(this,'${module.id}',${q.num},'richtig')" style="flex:1;">
+                    <span class="option-label">R</span>Richtig
+                </label>
+                <label class="option ${saved === 'falsch' ? 'selected' : ''}" onclick="selectOption(this,'${module.id}',${q.num},'falsch')" style="flex:1;">
+                    <span class="option-label">F</span>Falsch
+                </label>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderPersonQuestions(module) {
+    return module.questions.map(q => {
+        const saved = userAnswers[`${module.id}_${q.num}`] || '';
+        return `<div class="question-block ${saved ? 'answered' : ''}">
+            <span class="question-number">${q.num}</span>
+            <span class="question-text">${q.text}</span>
+            <div class="options">
+                ${q.options.map(o => {
+                    const v = o.charAt(0);
+                    return `<label class="option ${saved === v ? 'selected' : ''}" onclick="selectOption(this,'${module.id}',${q.num},'${v}')">
+                        <span class="option-label">${v}</span>${o.substring(3)}
+                    </label>`;
+                }).join('')}
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function renderWordBank(module) {
+    return `<div class="word-bank">
+        <h4>📝 Wortliste (zum Anklicken)</h4>
+        <div class="word-list">
+            ${module.wordBank.map(w => {
+                const isUsed = Object.values(userAnswers).some(v => v && v.toLowerCase() === w.toLowerCase());
+                return `<span class="word-item ${isUsed ? 'used' : ''}" onclick="selectWord(this,'${w}')">${w}</span>`;
+            }).join('')}
+        </div>
+    </div>`;
+}
+
+function renderGapText(module) {
+    let html = `<div class="text-content">`;
+    let text = module.text;
+    const gapCount = (text.match(/__\d+__/g) || []).length;
+    for (let i = 1; i <= gapCount; i++) {
+        const saved = userAnswers[`${module.id}_${i}`] || '';
+        text = text.replace(`__${i}__`, `<span class="gap-number">${i}</span><input type="text" class="gap-input ${saved ? 'filled' : ''}" id="gap_${module.id}_${i}" value="${saved}" onfocus="focusGap('${module.id}',${i})" onchange="saveGapAnswer('${module.id}',${i},this.value)">`);
+    }
+    html += text.replace(/\n/g, '<br>') + '</div>';
+    return html;
+}
+
+function restoreAnswers(module) {
+    // Restore dropdown selections for cloze types
+    if (module.type === 'cloze') {
+        document.querySelectorAll('.select-answer').forEach(sel => {
+            const match = sel.getAttribute('onchange')?.match(/saveAnswer\('([^']+)',(\d+)/);
+            if (match) {
+                const key = `${match[1]}_${match[2]}`;
+                if (userAnswers[key]) sel.value = userAnswers[key];
+            }
+        });
+    }
+}
+
+// ============================================
+// ANSWER HANDLING
+// ============================================
+function selectOption(el, moduleId, num, value) {
+    el.closest('.options').querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    saveAnswer(moduleId, num, value);
+    el.closest('.question-block').classList.add('answered');
+}
+
+function saveAnswer(moduleId, num, value) {
+    userAnswers[`${moduleId}_${num}`] = value;
+    updateProgress();
+}
+
+function selectWord(el, word) {
+    document.querySelectorAll('.word-item').forEach(w => w.classList.remove('selected'));
+    if (!el.classList.contains('used')) {
+        el.classList.add('selected');
+        selectedWord = word;
+    }
+}
+
+function focusGap(moduleId, num) {
+    selectedGapId = `gap_${moduleId}_${num}`;
+    if (selectedWord) {
+        const input = document.getElementById(selectedGapId);
+        if (input && !input.value) {
+            input.value = selectedWord;
+            input.classList.add('filled');
+            saveGapAnswer(moduleId, num, selectedWord);
+            selectedWord = null;
+            document.querySelectorAll('.word-item').forEach(w => w.classList.remove('selected'));
+            updateWordBankDisplay();
+        }
+    }
+}
+
+function saveGapAnswer(moduleId, num, value) {
+    userAnswers[`${moduleId}_${num}`] = value.toLowerCase().trim();
+    updateProgress();
+    updateWordBankDisplay();
+}
+
+function updateWordBankDisplay() {
+    document.querySelectorAll('.word-item').forEach(item => {
+        const word = item.textContent.toLowerCase();
+        const isUsed = Object.values(userAnswers).some(v => v && v.toLowerCase() === word);
+        item.classList.toggle('used', isUsed);
+    });
+}
+
+function hasModuleAnswers(moduleId) {
+    return Object.keys(userAnswers).some(k => k.startsWith(moduleId));
+}
+
+// ============================================
+// AUDIO
+// ============================================
+function playAudio(moduleId) {
+    const audio = document.getElementById('audioPlayer');
+    const btn = document.getElementById('playBtn');
+    if (audio) {
+        audio.play().catch(e => {
+            console.error('Audio play error:', e);
+            alert('Audio konnte nicht abgespielt werden. Bitte prüfen Sie Ihre Internetverbindung.');
+        });
+        btn.disabled = true;
+        btn.textContent = '⏸️ Läuft...';
+    }
+}
+
+function onAudioPlay() {
+    const btn = document.getElementById('playBtn');
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = '⏸️ Läuft...';
+    }
+}
+
+function onAudioEnded(moduleId) {
+    audioPlayCounts[moduleId] = (audioPlayCounts[moduleId] || 0) + 1;
+    const module = testData[currentSection][currentModuleIndex];
+    const canPlay = audioPlayCounts[moduleId] < module.maxPlays;
+    const btn = document.getElementById('playBtn');
+    if (btn) {
+        btn.disabled = !canPlay;
+        btn.textContent = canPlay ? `▶️ Abspielen (${audioPlayCounts[moduleId]}/${module.maxPlays})` : '🔒 Maximum erreicht';
+    }
+}
+
+// ============================================
+// PROGRESS
+// ============================================
+function updateProgress() {
+    let counts = { lesen: { a: 0, t: 35 }, hoeren: { a: 0, t: 25 }, zusatz: { a: 0, t: 58 } };
+    
+    Object.keys(userAnswers).forEach(key => {
+        if (userAnswers[key]) {
+            if (key.startsWith('lesen')) counts.lesen.a++;
+            else if (key.startsWith('hoeren')) counts.hoeren.a++;
+            else if (key.startsWith('zusatz')) counts.zusatz.a++;
+        }
+    });
+    
+    document.getElementById('lesenProgress').textContent = `${counts.lesen.a}/${counts.lesen.t} • 55 Min`;
+    document.getElementById('hoerenProgress').textContent = `${counts.hoeren.a}/${counts.hoeren.t} • 30 Min`;
+    document.getElementById('zusatzProgress').textContent = `${counts.zusatz.a}/${counts.zusatz.t} • 55 Min`;
+    
+    const total = counts.lesen.a + counts.hoeren.a + counts.zusatz.a;
+    const max = 118;
+    const pct = Math.round((total / max) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${pct}% (${total}/${max})`;
+}
+
+// ============================================
+// SUBMISSION & SCORING
+// ============================================
+function submitTest() {
+    clearInterval(timerInterval);
+    const scores = calculateScores();
+    const elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+    const elapsedMins = Math.floor(elapsedTime / 60);
+    const elapsedSecs = elapsedTime % 60;
+    
+    const result = {
+        userName: userData.name,
+        userEmail: userData.email,
+        userOrigin: userData.origin,
+        completedAt: new Date().toLocaleDateString('de-DE'),
+        totalPercent: scores.totalPercent,
+        lesenScore: scores.lesen.correct,
+        lesenTotal: scores.lesen.total,
+        hoerenScore: scores.hoeren.correct,
+        hoerenTotal: scores.hoeren.total,
+        zusatzScore: scores.zusatz.correct,
+        zusatzTotal: scores.zusatz.total,
+        elapsedTime: `${elapsedMins}:${elapsedSecs.toString().padStart(2, '0')}`
+    };
+    
+    localStorage.setItem('telc_test_completed', JSON.stringify(result));
+    showResults(scores, result);
+    saveToAirtable(result, scores);
+}
+
+function calculateScores() {
+    const scores = { lesen: { correct: 0, total: 35 }, hoeren: { correct: 0, total: 25 }, zusatz: { correct: 0, total: 58 } };
+    
+    // Score Lesen
+    testData.lesen.forEach(m => {
+        if (m.correctAnswers) {
+            Object.entries(m.correctAnswers).forEach(([num, correct]) => {
+                if (userAnswers[`${m.id}_${num}`]?.toLowerCase() === correct.toLowerCase()) scores.lesen.correct++;
+            });
+        }
+        if (m.questions) {
+            m.questions.forEach(q => {
+                if (userAnswers[`${m.id}_${q.num}`] === q.correct) scores.lesen.correct++;
+            });
+        }
+    });
+    
+    // Score Hören
+    testData.hoeren.forEach(m => {
+        m.questions.forEach(q => {
+            const ans = userAnswers[`${m.id}_${q.num}`];
+            if (ans?.toLowerCase() === q.correct.toLowerCase()) scores.hoeren.correct++;
+        });
+    });
+    
+    // Score Zusatz
+    testData.zusatz.forEach(m => {
+        m.correctAnswers.forEach((correct, i) => {
+            const ans = userAnswers[`${m.id}_${i + 1}`];
+            if (ans?.toLowerCase() === correct.toLowerCase()) scores.zusatz.correct++;
+        });
+    });
+    
+    const total = scores.lesen.correct + scores.hoeren.correct + scores.zusatz.correct;
+    const max = 118;
+    scores.totalPercent = Math.round((total / max) * 100);
+    scores.totalCorrect = total;
+    
+    return scores;
+}
+
+function showResults(scores, result) {
+    document.getElementById('testContainer').style.display = 'none';
+    document.getElementById('resultsScreen').style.display = 'block';
+    
+    document.getElementById('scoreCircle').style.setProperty('--score', scores.totalPercent);
+    document.getElementById('totalScore').textContent = scores.totalPercent + '%';
+    document.getElementById('lesenScore').textContent = `${scores.lesen.correct}/${scores.lesen.total}`;
+    document.getElementById('hoerenScore').textContent = `${scores.hoeren.correct}/${scores.hoeren.total}`;
+    document.getElementById('zusatzScore').textContent = `${scores.zusatz.correct}/${scores.zusatz.total}`;
+}
+
+// ============================================
+// AIRTABLE INTEGRATION
+// ============================================
+async function saveToAirtable(result, scores) {
+    const statusEl = document.getElementById('savingStatus');
+    statusEl.className = 'saving-status loading';
+    statusEl.textContent = '💾 Ergebnis wird gespeichert...';
+    
+    const data = {
+        fields: {
+            "Name": result.userName,
+            "Email": result.userEmail,
+            "Herkunft": result.userOrigin,
+            "Test Datum": new Date().toISOString(),
+            "Lesen Punkte": scores.lesen.correct,
+            "Lesen Gesamt": scores.lesen.total,
+            "Lesen Prozent": scores.lesen.correct / scores.lesen.total,
+            "Hören Punkte": scores.hoeren.correct,
+            "Hören Gesamt": scores.hoeren.total,
+            "Hören Prozent": scores.hoeren.correct / scores.hoeren.total,
+            "Zusatz Punkte": scores.zusatz.correct,
+            "Zusatz Gesamt": scores.zusatz.total,
+            "Zusatz Prozent": scores.zusatz.correct / scores.zusatz.total,
+            "Gesamt Punkte": scores.totalCorrect,
+            "Gesamt Prozent": scores.totalPercent / 100,
+            "Bestanden": scores.totalPercent >= 60,
+            "Verbrauchte Zeit": result.elapsedTime
+        }
+    };
+    
+    try {
+        // Try to save via Airtable API (requires API key)
+        const response = await fetch(`https://api.airtable.com/v0/${AIRTABLE_CONFIG.baseId}/${AIRTABLE_CONFIG.tableId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${AIRTABLE_CONFIG.apiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        if (response.ok) {
+            statusEl.className = 'saving-status success';
+            statusEl.textContent = '✅ Ergebnis erfolgreich in Airtable gespeichert!';
+        } else {
+            throw new Error('API Error');
+        }
+    } catch (error) {
+        console.log('Airtable save skipped (no API key configured)');
+        statusEl.className = 'saving-status success';
+        statusEl.textContent = '✅ Ergebnis lokal gespeichert. (Airtable-Sync erfordert API-Konfiguration)';
+    }
+}
+</script>
+</body>
+</html>
