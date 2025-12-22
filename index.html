@@ -8,6 +8,10 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #fff; }
         
+        /* Copy Protection - Prevent text selection and copying */
+        * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+        
         /* Registration Screen */
         .registration-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         .registration-box { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; max-width: 500px; width: 100%; border: 1px solid rgba(255,255,255,0.2); }
@@ -315,8 +319,8 @@
 // AIRTABLE CONFIGURATION
 // ============================================
 const AIRTABLE_CONFIG = {
-    baseId: 'app5dhxQ3aDALoEgu',
-    tableId: 'tblMiu73WlkOEiaKE',
+    baseId: 'appS0ZLU9pZTlJSFV',
+    tableId: 'tblDyLyHuW5PUwMl2',
     apiKey: '' // Wird vom Server bereitgestellt oder hier eingetragen
 };
 
@@ -607,6 +611,32 @@ document.addEventListener('DOMContentLoaded', function() {
             startTime: new Date().toISOString()
         };
         startTest();
+    });
+    
+    // Copy Protection - Prevent copy, cut, and context menu
+    document.addEventListener('copy', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    document.addEventListener('cut', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+    // Prevent keyboard shortcuts for copying
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'x' || e.key === 'a' || e.key === 'u' || e.key === 's')) {
+            e.preventDefault();
+            return false;
+        }
+        // Prevent F12, Ctrl+Shift+I, Ctrl+Shift+J (DevTools)
+        if (e.key === 'F12' || ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C'))) {
+            e.preventDefault();
+            return false;
+        }
     });
 });
 
@@ -1148,7 +1178,7 @@ async function saveToAirtable(result, scores) {
             "Zusatz Prozent": scores.zusatz.correct / scores.zusatz.total,
             "Gesamt Punkte": scores.totalCorrect,
             "Gesamt Prozent": scores.totalPercent / 100,
-            "Bestanden": scores.totalPercent >= 60,
+            "Bestanden": scores.totalPercent >= 80,
             "Verbrauchte Zeit": result.elapsedTime
         }
     };
