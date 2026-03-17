@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>German Bridge – Abschlussmodul Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); min-height: 100vh; color: #fff; }
+
+        /* Copy Protection */
+        * { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
+        input, textarea, select { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+
+        /* Registration Screen */
+        .registration-screen { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .registration-box { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; max-width: 520px; width: 100%; border: 1px solid rgba(255,255,255,0.2); }
+        .registration-box h1 { text-align: center; margin-bottom: 8px; color: #f59e0b; font-size: 1.8em; }
+        .registration-box .subtitle { text-align: center; color: #94a3b8; margin-bottom: 25px; font-size: 0.95em; }
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; margin-bottom: 7px; color: #e2e8f0; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 12px 16px; border: 2px solid rgba(255,255,255,0.2); border-radius: 10px; background: rgba(255,255,255,0.1); color: #fff; font-size: 15px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #f59e0b; }
+        .form-group select option { background: #1a1a2e; color: #fff; }
+        .start-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 10px; color: #fff; font-size: 17px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 15px; }
+        .start-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(245,158,11,0.3); }
+        .test-info { background: rgba(245,158,11,0.15); border-radius: 10px; padding: 15px; margin-bottom: 22px; border: 1px solid rgba(245,158,11,0.3); }
+        .test-info h3 { color: #fbbf24; margin-bottom: 10px; }
+        .test-info table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        .test-info th { color: #fbbf24; text-align: left; padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .test-info td { color: #94a3b8; padding: 5px 8px; }
+        .test-info td:last-child { text-align: right; color: #e2e8f0; font-weight: 600; }
+
+        /* Test Container */
+        .test-container { display: none; height: 100vh; overflow: hidden; flex-direction: column; }
+
+        /* Header */
+        .header { background: rgba(0,0,0,0.35); padding: 12px 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo h1 { font-size: 1.15em; color: #f59e0b; }
+        .user-info { color: #94a3b8; font-size: 0.88em; }
+        .timer-box { background: linear-gradient(135deg, #3b82f6, #1d4ed8); padding: 10px 20px; border-radius: 10px; text-align: center; min-width: 120px; }
+        .timer-box.warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .timer-box.danger { background: linear-gradient(135deg, #ef4444, #dc2626); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .timer-label { font-size: 0.72em; opacity: 0.8; }
+        .timer-display { font-size: 1.5em; font-weight: bold; font-family: monospace; }
+
+        /* Section Tabs */
+        .section-tabs { display: flex; background: rgba(0,0,0,0.2); padding: 10px 25px; gap: 10px; overflow-x: auto; }
+        .section-tab { padding: 10px 22px; background: rgba(255,255,255,0.08); border: 2px solid transparent; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.3s; white-space: nowrap; }
+        .section-tab:hover { background: rgba(255,255,255,0.15); }
+        .section-tab.active.lesen { background: linear-gradient(135deg, #22c55e, #16a34a); border-color: #4ade80; }
+        .section-tab.active.hoeren { background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-color: #a78bfa; }
+        .section-tab.active.woerter { background: linear-gradient(135deg, #f59e0b, #d97706); border-color: #fbbf24; }
+        .section-tab.active.grammatik { background: linear-gradient(135deg, #ef4444, #dc2626); border-color: #f87171; }
+        .section-tab .section-name { font-weight: 600; font-size: 0.95em; }
+        .section-tab .section-info { font-size: 0.78em; opacity: 0.8; margin-top: 3px; }
+
+        /* Main Content - Split View */
+        .main-content { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 175px); }
+        .left-panel { flex: 1; overflow-y: auto; padding: 22px; background: rgba(255,255,255,0.03); border-right: 1px solid rgba(255,255,255,0.1); }
+        .right-panel { flex: 1; overflow-y: auto; padding: 22px; background: rgba(255,255,255,0.05); }
+
+        /* Panel Headers */
+        .panel-header { background: rgba(0,0,0,0.3); padding: 14px 18px; border-radius: 12px; margin-bottom: 18px; }
+        .panel-header h2 { font-size: 1.1em; margin-bottom: 4px; }
+        .panel-header p { color: #94a3b8; font-size: 0.88em; }
+        .lesen .panel-header h2 { color: #4ade80; }
+        .hoeren .panel-header h2 { color: #a78bfa; }
+        .woerter .panel-header h2 { color: #fbbf24; }
+        .grammatik .panel-header h2 { color: #f87171; }
+
+        /* Text Content */
+        .text-content { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 22px; line-height: 1.85; font-size: 1.02em; }
+        .text-content h3 { color: #4ade80; margin-bottom: 14px; }
+        .placeholder-box { background: rgba(255,255,255,0.06); border: 2px dashed rgba(255,255,255,0.25); border-radius: 10px; padding: 20px; margin-bottom: 14px; color: #94a3b8; font-style: italic; text-align: center; }
+        .placeholder-box strong { display: block; color: #fbbf24; margin-bottom: 6px; font-style: normal; font-size: 0.9em; }
+
+        /* Audio Section */
+        .audio-section { background: rgba(139,92,246,0.2); border-radius: 12px; padding: 18px; margin-bottom: 18px; }
+        .audio-section h3 { color: #a78bfa; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+        .audio-controls { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+        .play-btn { padding: 11px 22px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: none; border-radius: 8px; color: #fff; font-size: 14px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+        .play-btn:hover:not(:disabled) { transform: scale(1.05); }
+        .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .play-count { color: #a78bfa; font-size: 0.88em; }
+        audio { width: 100%; margin-top: 10px; }
+
+        /* Word Bank */
+        .word-bank { background: rgba(245,158,11,0.15); border-radius: 12px; padding: 18px; margin-bottom: 18px; border: 1px solid rgba(245,158,11,0.3); }
+        .word-bank h4 { color: #fbbf24; margin-bottom: 12px; }
+        .word-list { display: flex; flex-wrap: wrap; gap: 8px; }
+        .word-item { padding: 6px 13px; background: rgba(255,255,255,0.12); border-radius: 6px; cursor: pointer; transition: all 0.3s; font-size: 0.93em; }
+        .word-item:hover { background: rgba(255,255,255,0.22); transform: scale(1.04); }
+        .word-item.used { opacity: 0.4; text-decoration: line-through; cursor: not-allowed; }
+
+        /* Questions */
+        .question-block { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 18px; margin-bottom: 14px; transition: all 0.3s; }
+        .question-block:hover { background: rgba(255,255,255,0.08); }
+        .question-block.answered { border-left: 4px solid #4ade80; }
+        .question-number { display: inline-block; background: #3b82f6; color: #fff; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 30px; font-weight: bold; margin-right: 10px; font-size: 0.9em; }
+        .question-number.hoeren-num { background: #8b5cf6; }
+        .question-number.woerter-num { background: #f59e0b; color: #000; }
+        .question-number.grammatik-num { background: #ef4444; }
+        .question-text { font-size: 1.02em; margin-bottom: 14px; line-height: 1.5; }
+
+        /* Options */
+        .options { display: flex; flex-direction: column; gap: 9px; }
+        .option { display: flex; align-items: center; padding: 11px 14px; background: rgba(255,255,255,0.05); border: 2px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .option:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+        .option.selected { background: rgba(59,130,246,0.3); border-color: #3b82f6; }
+        .option-label { display: inline-block; width: 26px; height: 26px; background: rgba(255,255,255,0.1); border-radius: 50%; text-align: center; line-height: 26px; margin-right: 11px; font-weight: bold; font-size: 0.88em; }
+        .option.selected .option-label { background: #3b82f6; }
+
+        /* Gap Fill */
+        .gap-input { display: inline-block; min-width: 130px; padding: 5px 11px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 1em; text-align: center; margin: 0 5px; }
+        .gap-input:focus { outline: none; border-color: #f59e0b; }
+        .gap-input.filled { border-color: #f59e0b; background: rgba(245,158,11,0.2); }
+        .gap-select { display: inline-block; min-width: 155px; padding: 5px 11px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-size: 1em; margin: 0 5px; cursor: pointer; }
+        .gap-select:focus { outline: none; border-color: #f59e0b; }
+        .gap-select.filled { border-color: #f59e0b; background: rgba(245,158,11,0.2); }
+        .gap-select option { background: #1a1a2e; color: #fff; }
+        .gap-number { display: inline-block; background: #f59e0b; color: #000; width: 22px; height: 22px; border-radius: 50%; text-align: center; line-height: 22px; font-size: 0.73em; font-weight: bold; margin-right: 3px; vertical-align: middle; }
+
+        /* Sentence Ordering */
+        .sentence-order { background: rgba(245,158,11,0.1); border-radius: 10px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(245,158,11,0.25); }
+        .sentence-order .words-scrambled { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .word-chip { padding: 6px 13px; background: rgba(245,158,11,0.25); border-radius: 6px; font-size: 0.93em; border: 1px solid rgba(245,158,11,0.4); }
+        .answer-line { width: 100%; padding: 9px 14px; background: rgba(255,255,255,0.08); border: 2px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; font-size: 0.97em; }
+        .answer-line:focus { outline: none; border-color: #f59e0b; }
+
+        /* Navigation Footer */
+        .nav-footer { background: rgba(0,0,0,0.3); padding: 13px 25px; display: flex; justify-content: space-between; align-items: center; gap: 14px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-btn { padding: 11px 28px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .nav-btn:hover { transform: translateY(-1px); }
+        .btn-prev { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-next { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; }
+        .btn-submit { background: linear-gradient(135deg, #4ade80, #22c55e); color: #fff; }
+        .progress-info { color: #94a3b8; font-size: 0.88em; text-align: center; }
+
+        /* Results Screen */
+        .results-screen { display: none; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 30px 20px; }
+        .results-box { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px; max-width: 680px; width: 100%; border: 1px solid rgba(255,255,255,0.15); }
+        .results-box h2 { text-align: center; color: #f59e0b; font-size: 1.8em; margin-bottom: 8px; }
+        .results-box .subtitle { text-align: center; color: #94a3b8; margin-bottom: 28px; }
+        .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+        .score-card { background: rgba(255,255,255,0.07); border-radius: 12px; padding: 18px; text-align: center; }
+        .score-card .label { color: #94a3b8; font-size: 0.85em; margin-bottom: 6px; }
+        .score-card .value { font-size: 2em; font-weight: bold; }
+        .score-card.lesen .value { color: #4ade80; }
+        .score-card.hoeren .value { color: #a78bfa; }
+        .score-card.woerter .value { color: #fbbf24; }
+        .score-card.grammatik .value { color: #f87171; }
+        .score-card.total { grid-column: 1 / -1; background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); }
+        .score-card.total .value { color: #f59e0b; font-size: 2.4em; }
+        .passed-badge { text-align: center; padding: 14px; border-radius: 12px; font-size: 1.2em; font-weight: 600; margin-bottom: 22px; }
+        .passed-badge.passed { background: rgba(74,222,128,0.2); color: #4ade80; border: 1px solid #4ade80; }
+        .passed-badge.failed { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid #f87171; }
+        .restart-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #f59e0b, #d97706); border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .restart-btn:hover { transform: translateY(-2px); }
+
+        /* Utility */
+        .section-content { display: none; }
+        .section-content.active { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 175px); }
+        .section-content.active .left-panel,
+        .section-content.active .right-panel { overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<!-- ============================================================
+     REGISTRIERUNGSBILDSCHIRM
+     ============================================================ -->
+<div class="registration-screen" id="registrationScreen">
+    <div class="registration-box">
+        <h1>German Bridge</h1>
+        <p class="subtitle">Abschlussmodul Test &ndash; 40 Punkte</p>
+
+        <div class="test-info">
+            <h3>Testübersicht</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Modul</th>
+                        <th>Aufgaben</th>
+                        <th>Punkte</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>📖 Leseverstehen</td><td>10 Fragen</td><td>10</td></tr>
+                    <tr><td>🎧 Hörverstehen</td><td>10 Fragen</td><td>10</td></tr>
+                    <tr><td>🔤 Wörter zur Ordnung</td><td>5 Sätze</td><td>5</td></tr>
+                    <tr><td>✍️ Grammatik</td><td>15 Lücken</td><td>15</td></tr>
+                    <tr style="border-top:1px solid rgba(255,255,255,0.15)">
+                        <td><strong>Gesamt</strong></td><td><strong>40</strong></td><td><strong>40</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-group">
+            <label for="studentName">Vor- und Nachname</label>
+            <input type="text" id="studentName" placeholder="z. B. Maria Müller">
+        </div>
+        <div class="form-group">
+            <label for="studentEmail">E-Mail-Adresse</label>
+            <input type="email" id="studentEmail" placeholder="z. B. maria@example.com">
+        </div>
+        <div class="form-group">
+            <label for="studentLevel">Sprachniveau</label>
+            <select id="studentLevel">
+                <option value="">-- Bitte wählen --</option>
+                <option value="A2">A2</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+            </select>
+        </div>
+
+        <button class="start-btn" onclick="startTest()">Test starten ▶</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     TEST-CONTAINER
+     ============================================================ -->
+<div class="test-container" id="testContainer">
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo"><h1>German Bridge – Abschlussmodul</h1></div>
+        <div class="user-info" id="userInfoDisplay">Teilnehmer: –</div>
+        <div class="timer-box" id="timerBox">
+            <div class="timer-label">Verbleibende Zeit</div>
+            <div class="timer-display" id="timerDisplay">45:00</div>
+        </div>
+    </div>
+
+    <!-- Section Tabs -->
+    <div class="section-tabs">
+        <div class="section-tab lesen active" id="tab-lesen" onclick="switchSection('lesen')">
+            <div class="section-name">📖 Leseverstehen</div>
+            <div class="section-info">10 Punkte</div>
+        </div>
+        <div class="section-tab hoeren" id="tab-hoeren" onclick="switchSection('hoeren')">
+            <div class="section-name">🎧 Hörverstehen</div>
+            <div class="section-info">10 Punkte</div>
+        </div>
+        <div class="section-tab woerter" id="tab-woerter" onclick="switchSection('woerter')">
+            <div class="section-name">🔤 Wörter zur Ordnung</div>
+            <div class="section-info">5 Punkte</div>
+        </div>
+        <div class="section-tab grammatik" id="tab-grammatik" onclick="switchSection('grammatik')">
+            <div class="section-name">✍️ Grammatik</div>
+            <div class="section-info">15 Punkte</div>
+        </div>
+    </div>
+
+    <!-- ==================== LESEVERSTEHEN ==================== -->
+    <div class="section-content lesen active" id="section-lesen">
+        <div class="left-panel">
+            <div class="panel-header lesen">
+                <h2>📖 Leseverstehen</h2>
+                <p>Lesen Sie den Text sorgfältig und beantworten Sie die Fragen auf der rechten Seite.</p>
+            </div>
+            <div class="text-content">
+                <h3>[PLATZHALTER: Titel des Lesetextes]</h3>
+                <div class="placeholder-box">
+                    <strong>PLATZHALTER – LESETEXT (ca. 250–350 Wörter)</strong>
+                    Hier kommt der vollständige Lesetext zum Thema des Moduls. Der Text soll dem Sprachniveau B1/B2 entsprechen und die Grundlage für die 10 Verständnisfragen bilden. Empfohlene Texttypen: Zeitungsartikel, Informationstext, Bericht oder Fachtext aus dem Berufsfeld.
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="panel-header lesen">
+                <h2>Fragen 1–10</h2>
+                <p>Wählen Sie jeweils die richtige Antwort (a, b oder c). Jede Frage: 1 Punkt.</p>
+            </div>
+
+            <!-- Fragen 1–10 Platzhalter -->
+            <script>
+                // Leseverstehen-Fragen (Platzhalter)
+                const lesenFragen = [
+                    { num: 1, text: '[PLATZHALTER: Frage 1 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 2, text: '[PLATZHALTER: Frage 2 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 3, text: '[PLATZHALTER: Frage 3 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 4, text: '[PLATZHALTER: Frage 4 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 5, text: '[PLATZHALTER: Frage 5 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 6, text: '[PLATZHALTER: Frage 6 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 7, text: '[PLATZHALTER: Frage 7 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 8, text: '[PLATZHALTER: Frage 8 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 9, text: '[PLATZHALTER: Frage 9 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 10, text: '[PLATZHALTER: Frage 10 zum Lesetext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' }
+                ];
+            </script>
+            <div id="lesen-questions"></div>
+        </div>
+    </div>
+
+    <!-- ==================== HÖRVERSTEHEN ==================== -->
+    <div class="section-content hoeren" id="section-hoeren">
+        <div class="left-panel">
+            <div class="panel-header hoeren">
+                <h2>🎧 Hörverstehen</h2>
+                <p>Hören Sie sich die Audiodatei an und beantworten Sie die Fragen auf der rechten Seite.</p>
+            </div>
+            <div class="audio-section">
+                <h3>🔊 Audiodatei</h3>
+                <div class="placeholder-box">
+                    <strong>PLATZHALTER – AUDIODATEI</strong>
+                    Hier wird die Audiodatei eingebettet. Empfohlenes Format: MP3, ca. 3–5 Minuten. Thema: [PLATZHALTER – Thema des Hörtextes, z. B. Gespräch, Vortrag, Nachricht].
+                </div>
+                <div class="audio-controls">
+                    <button class="play-btn" id="playBtn" onclick="playAudio()">
+                        ▶ Abspielen
+                    </button>
+                    <span class="play-count" id="playCount">Noch 2 Mal abspielbar</span>
+                </div>
+                <audio id="audioPlayer" src="audio/[PLATZHALTER_AUDIODATEI].mp3" onended="audioEnded()"></audio>
+            </div>
+            <div class="text-content">
+                <h3>[PLATZHALTER: Thema / Kontext des Hörtextes]</h3>
+                <div class="placeholder-box">
+                    <strong>PLATZHALTER – KONTEXTINFORMATION</strong>
+                    Optionale kurze Einleitung oder Kontext zum Hörtext, damit die Lernenden wissen, was sie erwartet (z. B. „Sie hören ein Gespräch zwischen zwei Kollegen über ...").
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="panel-header hoeren">
+                <h2>Fragen 11–20</h2>
+                <p>Wählen Sie jeweils die richtige Antwort (a, b oder c). Jede Frage: 1 Punkt.</p>
+            </div>
+            <script>
+                const hoerenFragen = [
+                    { num: 11, text: '[PLATZHALTER: Frage 1 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 12, text: '[PLATZHALTER: Frage 2 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 13, text: '[PLATZHALTER: Frage 3 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 14, text: '[PLATZHALTER: Frage 4 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 15, text: '[PLATZHALTER: Frage 5 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 16, text: '[PLATZHALTER: Frage 6 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 17, text: '[PLATZHALTER: Frage 7 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 18, text: '[PLATZHALTER: Frage 8 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 19, text: '[PLATZHALTER: Frage 9 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 20, text: '[PLATZHALTER: Frage 10 zum Hörtext]', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' }
+                ];
+            </script>
+            <div id="hoeren-questions"></div>
+        </div>
+    </div>
+
+    <!-- ==================== WÖRTER ZUR ORDNUNG ==================== -->
+    <div class="section-content woerter" id="section-woerter">
+        <div class="left-panel">
+            <div class="panel-header woerter">
+                <h2>🔤 Wörter zur Ordnung</h2>
+                <p>Bringen Sie die Wörter in die richtige Reihenfolge, um einen grammatisch korrekten Satz zu bilden.</p>
+            </div>
+            <div class="text-content">
+                <h3>Hinweise</h3>
+                <div class="placeholder-box">
+                    <strong>PLATZHALTER – THEMATISCHER KONTEXT</strong>
+                    Optionaler Hinweis oder Kontext zu den Sätzen (z. B. „Alle Sätze beziehen sich auf das Thema [THEMA]"). Grammatikthemen: Satzstellung, Nebensätze, Verbklammer, Inversion.
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="panel-header woerter">
+                <h2>Aufgaben 21–25</h2>
+                <p>Schreiben Sie den vollständigen, korrekt geordneten Satz in das Eingabefeld. Jede Aufgabe: 1 Punkt.</p>
+            </div>
+
+            <!-- Satz 21 -->
+            <div class="question-block" id="q21">
+                <span class="question-number woerter-num">21</span>
+                <div class="question-text">Bringen Sie die Wörter in die richtige Reihenfolge:</div>
+                <div class="sentence-order">
+                    <div class="words-scrambled">
+                        <span class="word-chip">[PLATZHALTER_W1]</span>
+                        <span class="word-chip">[PLATZHALTER_W2]</span>
+                        <span class="word-chip">[PLATZHALTER_W3]</span>
+                        <span class="word-chip">[PLATZHALTER_W4]</span>
+                        <span class="word-chip">[PLATZHALTER_W5]</span>
+                    </div>
+                    <input type="text" class="answer-line" id="ans21" placeholder="Ihr Satz hier ..." oninput="markAnswered('q21')">
+                </div>
+                <small style="color:#94a3b8;">Grammatikthema: [PLATZHALTER – z. B. Nebensatz mit „weil"]</small>
+            </div>
+
+            <!-- Satz 22 -->
+            <div class="question-block" id="q22">
+                <span class="question-number woerter-num">22</span>
+                <div class="question-text">Bringen Sie die Wörter in die richtige Reihenfolge:</div>
+                <div class="sentence-order">
+                    <div class="words-scrambled">
+                        <span class="word-chip">[PLATZHALTER_W1]</span>
+                        <span class="word-chip">[PLATZHALTER_W2]</span>
+                        <span class="word-chip">[PLATZHALTER_W3]</span>
+                        <span class="word-chip">[PLATZHALTER_W4]</span>
+                        <span class="word-chip">[PLATZHALTER_W5]</span>
+                    </div>
+                    <input type="text" class="answer-line" id="ans22" placeholder="Ihr Satz hier ..." oninput="markAnswered('q22')">
+                </div>
+                <small style="color:#94a3b8;">Grammatikthema: [PLATZHALTER – z. B. Inversion / Verbzweitstellung]</small>
+            </div>
+
+            <!-- Satz 23 -->
+            <div class="question-block" id="q23">
+                <span class="question-number woerter-num">23</span>
+                <div class="question-text">Bringen Sie die Wörter in die richtige Reihenfolge:</div>
+                <div class="sentence-order">
+                    <div class="words-scrambled">
+                        <span class="word-chip">[PLATZHALTER_W1]</span>
+                        <span class="word-chip">[PLATZHALTER_W2]</span>
+                        <span class="word-chip">[PLATZHALTER_W3]</span>
+                        <span class="word-chip">[PLATZHALTER_W4]</span>
+                        <span class="word-chip">[PLATZHALTER_W5]</span>
+                    </div>
+                    <input type="text" class="answer-line" id="ans23" placeholder="Ihr Satz hier ..." oninput="markAnswered('q23')">
+                </div>
+                <small style="color:#94a3b8;">Grammatikthema: [PLATZHALTER – z. B. Perfekt mit Verbklammer]</small>
+            </div>
+
+            <!-- Satz 24 -->
+            <div class="question-block" id="q24">
+                <span class="question-number woerter-num">24</span>
+                <div class="question-text">Bringen Sie die Wörter in die richtige Reihenfolge:</div>
+                <div class="sentence-order">
+                    <div class="words-scrambled">
+                        <span class="word-chip">[PLATZHALTER_W1]</span>
+                        <span class="word-chip">[PLATZHALTER_W2]</span>
+                        <span class="word-chip">[PLATZHALTER_W3]</span>
+                        <span class="word-chip">[PLATZHALTER_W4]</span>
+                        <span class="word-chip">[PLATZHALTER_W5]</span>
+                    </div>
+                    <input type="text" class="answer-line" id="ans24" placeholder="Ihr Satz hier ..." oninput="markAnswered('q24')">
+                </div>
+                <small style="color:#94a3b8;">Grammatikthema: [PLATZHALTER – z. B. Relativsatz]</small>
+            </div>
+
+            <!-- Satz 25 -->
+            <div class="question-block" id="q25">
+                <span class="question-number woerter-num">25</span>
+                <div class="question-text">Bringen Sie die Wörter in die richtige Reihenfolge:</div>
+                <div class="sentence-order">
+                    <div class="words-scrambled">
+                        <span class="word-chip">[PLATZHALTER_W1]</span>
+                        <span class="word-chip">[PLATZHALTER_W2]</span>
+                        <span class="word-chip">[PLATZHALTER_W3]</span>
+                        <span class="word-chip">[PLATZHALTER_W4]</span>
+                        <span class="word-chip">[PLATZHALTER_W5]</span>
+                    </div>
+                    <input type="text" class="answer-line" id="ans25" placeholder="Ihr Satz hier ..." oninput="markAnswered('q25')">
+                </div>
+                <small style="color:#94a3b8;">Grammatikthema: [PLATZHALTER – z. B. Modalverb im Präteritum]</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== GRAMMATIK ==================== -->
+    <div class="section-content grammatik" id="section-grammatik">
+        <div class="left-panel">
+            <div class="panel-header grammatik">
+                <h2>✍️ Grammatik</h2>
+                <p>Lesen Sie den Text und füllen Sie die Lücken mit der richtigen grammatikalischen Form aus.</p>
+            </div>
+            <div class="text-content">
+                <h3>[PLATZHALTER: Titel des Grammatiktextes]</h3>
+                <div class="placeholder-box">
+                    <strong>PLATZHALTER – GRAMMATIKTEXT MIT LÜCKEN (15 Lücken)</strong>
+                    Hier kommt ein zusammenhängender Text (ca. 200–300 Wörter) mit 15 nummerierten Lücken. Jede Lücke testet ein bestimmtes Grammatikthema. Die Lücken werden als Dropdown-Menüs oder Freitextfelder implementiert.
+                    <br><br>
+                    Empfohlene Grammatikthemen für die 15 Lücken:<br>
+                    (1) Verb im Perfekt &nbsp;|&nbsp; (2) Adjektivdeklination &nbsp;|&nbsp; (3) Präposition + Kasus<br>
+                    (4) Relativpronomen &nbsp;|&nbsp; (5) Konjunktion &nbsp;|&nbsp; (6) Verb im Präteritum<br>
+                    (7) Artikel (bestimmt/unbestimmt) &nbsp;|&nbsp; (8) Personalpronomen &nbsp;|&nbsp; (9) N-Deklination<br>
+                    (10) Passiv &nbsp;|&nbsp; (11) Konjunktiv II &nbsp;|&nbsp; (12) Komparativ/Superlativ<br>
+                    (13) Wechselpräposition &nbsp;|&nbsp; (14) Reflexivpronomen &nbsp;|&nbsp; (15) Modalverb
+                </div>
+            </div>
+        </div>
+        <div class="right-panel">
+            <div class="panel-header grammatik">
+                <h2>Lücken 26–40</h2>
+                <p>Wählen Sie für jede Lücke die richtige Lösung. Jede Lücke: 1 Punkt.</p>
+            </div>
+
+            <!-- Grammatik-Lücken 26–40 als Einzelfragen -->
+            <script>
+                const grammatikFragen = [
+                    { num: 26, text: '[PLATZHALTER: Satz mit Lücke 1 – Verb im Perfekt]', hint: 'Perfekt', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 27, text: '[PLATZHALTER: Satz mit Lücke 2 – Adjektivdeklination]', hint: 'Adjektivdeklination', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 28, text: '[PLATZHALTER: Satz mit Lücke 3 – Präposition + Kasus]', hint: 'Präposition', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 29, text: '[PLATZHALTER: Satz mit Lücke 4 – Relativpronomen]', hint: 'Relativpronomen', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 30, text: '[PLATZHALTER: Satz mit Lücke 5 – Konjunktion]', hint: 'Konjunktion', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 31, text: '[PLATZHALTER: Satz mit Lücke 6 – Verb im Präteritum]', hint: 'Präteritum', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 32, text: '[PLATZHALTER: Satz mit Lücke 7 – Artikel]', hint: 'Artikel', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 33, text: '[PLATZHALTER: Satz mit Lücke 8 – Personalpronomen]', hint: 'Pronomen', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 34, text: '[PLATZHALTER: Satz mit Lücke 9 – N-Deklination]', hint: 'N-Deklination', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 35, text: '[PLATZHALTER: Satz mit Lücke 10 – Passiv]', hint: 'Passiv', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 36, text: '[PLATZHALTER: Satz mit Lücke 11 – Konjunktiv II]', hint: 'Konjunktiv II', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 37, text: '[PLATZHALTER: Satz mit Lücke 12 – Komparativ/Superlativ]', hint: 'Komparativ', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 38, text: '[PLATZHALTER: Satz mit Lücke 13 – Wechselpräposition]', hint: 'Wechselpräposition', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 39, text: '[PLATZHALTER: Satz mit Lücke 14 – Reflexivpronomen]', hint: 'Reflexivpronomen', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' },
+                    { num: 40, text: '[PLATZHALTER: Satz mit Lücke 15 – Modalverb]', hint: 'Modalverb', options: ['[Option A]', '[Option B]', '[Option C]'], correct: 'a' }
+                ];
+            </script>
+            <div id="grammatik-questions"></div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="nav-footer">
+        <button class="nav-btn btn-prev" onclick="prevSection()">◀ Zurück</button>
+        <div class="progress-info" id="progressInfo">Abschnitt 1 von 4</div>
+        <button class="nav-btn btn-next" id="nextBtn" onclick="nextSection()">Weiter ▶</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     ERGEBNISBILDSCHIRM
+     ============================================================ -->
+<div class="results-screen" id="resultsScreen">
+    <div class="results-box">
+        <h2>Testergebnis</h2>
+        <p class="subtitle" id="resultSubtitle">German Bridge – Abschlussmodul</p>
+
+        <div class="score-grid">
+            <div class="score-card lesen">
+                <div class="label">📖 Leseverstehen</div>
+                <div class="value" id="scoreLesenDisplay">–</div>
+                <div style="color:#94a3b8;font-size:0.8em;">von 10 Punkten</div>
+            </div>
+            <div class="score-card hoeren">
+                <div class="label">🎧 Hörverstehen</div>
+                <div class="value" id="scoreHoerenDisplay">–</div>
+                <div style="color:#94a3b8;font-size:0.8em;">von 10 Punkten</div>
+            </div>
+            <div class="score-card woerter">
+                <div class="label">🔤 Wörter zur Ordnung</div>
+                <div class="value" id="scoreWoerterDisplay">–</div>
+                <div style="color:#94a3b8;font-size:0.8em;">von 5 Punkten</div>
+            </div>
+            <div class="score-card grammatik">
+                <div class="label">✍️ Grammatik</div>
+                <div class="value" id="scoreGrammatikDisplay">–</div>
+                <div style="color:#94a3b8;font-size:0.8em;">von 15 Punkten</div>
+            </div>
+            <div class="score-card total">
+                <div class="label">Gesamtergebnis</div>
+                <div class="value" id="scoreTotalDisplay">–</div>
+                <div style="color:#94a3b8;font-size:0.85em;">von 40 Punkten</div>
+            </div>
+        </div>
+
+        <div class="passed-badge" id="passedBadge">–</div>
+
+        <button class="restart-btn" onclick="restartTest()">Neuen Test starten</button>
+    </div>
+</div>
+
+<!-- ============================================================
+     JAVASCRIPT
+     ============================================================ -->
+<script>
+    // ── Zustand ──────────────────────────────────────────────
+    let answers = {};
+    let currentSection = 'lesen';
+    let timerInterval = null;
+    let timeLeft = 45 * 60; // 45 Minuten
+    let audioPlayCount = 2;
+    const sections = ['lesen', 'hoeren', 'woerter', 'grammatik'];
+
+    // Lösungen (Platzhalter – alle auf 'a' gesetzt; bitte ersetzen)
+    const correctAnswers = {
+        lesen:    { 1:'a', 2:'a', 3:'a', 4:'a', 5:'a', 6:'a', 7:'a', 8:'a', 9:'a', 10:'a' },
+        hoeren:   { 11:'a', 12:'a', 13:'a', 14:'a', 15:'a', 16:'a', 17:'a', 18:'a', 19:'a', 20:'a' },
+        woerter:  {
+            // Platzhalter-Lösungen für Sätze 21–25
+            21: '[PLATZHALTER: Korrekte Satzlösung 21]',
+            22: '[PLATZHALTER: Korrekte Satzlösung 22]',
+            23: '[PLATZHALTER: Korrekte Satzlösung 23]',
+            24: '[PLATZHALTER: Korrekte Satzlösung 24]',
+            25: '[PLATZHALTER: Korrekte Satzlösung 25]'
+        },
+        grammatik: { 26:'a', 27:'a', 28:'a', 29:'a', 30:'a', 31:'a', 32:'a', 33:'a', 34:'a', 35:'a', 36:'a', 37:'a', 38:'a', 39:'a', 40:'a' }
+    };
+
+    // ── Fragen rendern ────────────────────────────────────────
+    function renderMCQ(containerId, fragen, section, numClass) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = fragen.map(f => `
+            <div class="question-block" id="q${f.num}">
+                <span class="question-number ${numClass}">${f.num}</span>
+                <span class="question-text">${f.text}</span>
+                ${f.hint ? `<div style="color:#94a3b8;font-size:0.82em;margin-bottom:10px;">Thema: ${f.hint}</div>` : ''}
+                <div class="options">
+                    ${['a','b','c'].map((l,i) => `
+                        <div class="option" id="opt_${f.num}_${l}" onclick="selectOption('${section}', ${f.num}, '${l}')">
+                            <span class="option-label">${l.toUpperCase()}</span>
+                            <span>${f.options[i]}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function initQuestions() {
+        renderMCQ('lesen-questions',    lesenFragen,    'lesen',    '');
+        renderMCQ('hoeren-questions',   hoerenFragen,   'hoeren',   'hoeren-num');
+        renderMCQ('grammatik-questions',grammatikFragen,'grammatik','grammatik-num');
+    }
+
+    // ── Antworten speichern ───────────────────────────────────
+    function selectOption(section, num, letter) {
+        if (!answers[section]) answers[section] = {};
+        answers[section][num] = letter;
+        ['a','b','c'].forEach(l => {
+            const el = document.getElementById(`opt_${num}_${l}`);
+            if (el) el.classList.toggle('selected', l === letter);
+        });
+        const qBlock = document.getElementById(`q${num}`);
+        if (qBlock) qBlock.classList.add('answered');
+    }
+
+    function markAnswered(qId) {
+        const el = document.getElementById(qId);
+        const input = el ? el.querySelector('.answer-line') : null;
+        if (input && input.value.trim()) el.classList.add('answered');
+        else if (el) el.classList.remove('answered');
+    }
+
+    // ── Abschnitt wechseln ────────────────────────────────────
+    function switchSection(name) {
+        sections.forEach(s => {
+            document.getElementById(`section-${s}`).classList.remove('active');
+            document.getElementById(`tab-${s}`).classList.remove('active');
+        });
+        document.getElementById(`section-${name}`).classList.add('active');
+        document.getElementById(`tab-${name}`).classList.add('active', name);
+        currentSection = name;
+        updateNavFooter();
+    }
+
+    function nextSection() {
+        const idx = sections.indexOf(currentSection);
+        if (idx < sections.length - 1) switchSection(sections[idx + 1]);
+        else submitTest();
+    }
+
+    function prevSection() {
+        const idx = sections.indexOf(currentSection);
+        if (idx > 0) switchSection(sections[idx - 1]);
+    }
+
+    function updateNavFooter() {
+        const idx = sections.indexOf(currentSection);
+        document.getElementById('progressInfo').textContent = `Abschnitt ${idx + 1} von ${sections.length}`;
+        const nextBtn = document.getElementById('nextBtn');
+        nextBtn.textContent = idx === sections.length - 1 ? 'Test abgeben ✓' : 'Weiter ▶';
+        nextBtn.className = 'nav-btn ' + (idx === sections.length - 1 ? 'btn-submit' : 'btn-next');
+    }
+
+    // ── Timer ─────────────────────────────────────────────────
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${m}:${s}`;
+            const box = document.getElementById('timerBox');
+            if (timeLeft <= 300) box.className = 'timer-box danger';
+            else if (timeLeft <= 600) box.className = 'timer-box warning';
+            if (timeLeft <= 0) { clearInterval(timerInterval); submitTest(); }
+        }, 1000);
+    }
+
+    // ── Audio ─────────────────────────────────────────────────
+    function playAudio() {
+        if (audioPlayCount <= 0) return;
+        const audio = document.getElementById('audioPlayer');
+        audio.play();
+        audioPlayCount--;
+        document.getElementById('playBtn').disabled = audioPlayCount <= 0;
+        document.getElementById('playCount').textContent =
+            audioPlayCount > 0 ? `Noch ${audioPlayCount} Mal abspielbar` : 'Limit erreicht';
+    }
+
+    function audioEnded() {
+        document.getElementById('playBtn').textContent = '▶ Nochmals abspielen';
+    }
+
+    // ── Test starten ──────────────────────────────────────────
+    function startTest() {
+        const name  = document.getElementById('studentName').value.trim();
+        const email = document.getElementById('studentEmail').value.trim();
+        const level = document.getElementById('studentLevel').value;
+        if (!name || !email || !level) {
+            alert('Bitte alle Felder ausfüllen.');
+            return;
+        }
+        document.getElementById('userInfoDisplay').textContent = `${name} | ${level}`;
+        document.getElementById('registrationScreen').style.display = 'none';
+        const tc = document.getElementById('testContainer');
+        tc.style.display = 'flex';
+        initQuestions();
+        switchSection('lesen');
+        startTimer();
+    }
+
+    // ── Auswertung ────────────────────────────────────────────
+    function submitTest() {
+        clearInterval(timerInterval);
+
+        // Leseverstehen
+        let scoreLesen = 0;
+        for (let n = 1; n <= 10; n++) {
+            if (answers.lesen && answers.lesen[n] === correctAnswers.lesen[n]) scoreLesen++;
+        }
+
+        // Hörverstehen
+        let scoreHoeren = 0;
+        for (let n = 11; n <= 20; n++) {
+            if (answers.hoeren && answers.hoeren[n] === correctAnswers.hoeren[n]) scoreHoeren++;
+        }
+
+        // Wörter zur Ordnung (manuelle Bewertung / vereinfachter Vergleich)
+        let scoreWoerter = 0;
+        for (let n = 21; n <= 25; n++) {
+            const userAns = (document.getElementById(`ans${n}`) || {}).value || '';
+            const correct = correctAnswers.woerter[n] || '';
+            if (userAns.trim().toLowerCase() === correct.trim().toLowerCase()) scoreWoerter++;
+        }
+
+        // Grammatik
+        let scoreGrammatik = 0;
+        for (let n = 26; n <= 40; n++) {
+            if (answers.grammatik && answers.grammatik[n] === correctAnswers.grammatik[n]) scoreGrammatik++;
+        }
+
+        const total = scoreLesen + scoreHoeren + scoreWoerter + scoreGrammatik;
+        const passed = total >= 24; // Bestehensgrenze: 60 %
+
+        document.getElementById('testContainer').style.display = 'none';
+        const rs = document.getElementById('resultsScreen');
+        rs.style.display = 'flex';
+
+        document.getElementById('scoreLesenDisplay').textContent    = `${scoreLesen}/10`;
+        document.getElementById('scoreHoerenDisplay').textContent   = `${scoreHoeren}/10`;
+        document.getElementById('scoreWoerterDisplay').textContent  = `${scoreWoerter}/5`;
+        document.getElementById('scoreGrammatikDisplay').textContent= `${scoreGrammatik}/15`;
+        document.getElementById('scoreTotalDisplay').textContent    = `${total}/40`;
+
+        const badge = document.getElementById('passedBadge');
+        badge.textContent = passed ? '✓ Bestanden!' : '✗ Nicht bestanden';
+        badge.className   = 'passed-badge ' + (passed ? 'passed' : 'failed');
+    }
+
+    function restartTest() {
+        answers = {};
+        timeLeft = 45 * 60;
+        audioPlayCount = 2;
+        document.getElementById('resultsScreen').style.display = 'none';
+        document.getElementById('registrationScreen').style.display = 'flex';
+        document.getElementById('timerBox').className = 'timer-box';
+        document.getElementById('timerDisplay').textContent = '45:00';
+    }
+</script>
+</body>
+</html>
